@@ -21,4 +21,6 @@
 
 ## 验证
 
+商店固定陈设、字牌、服务印台和 39 件遗物使用 `assets/object_stage/counter_geometry.res` 的共享网格；标题界面后台预读网格和商店脚本，进入与刷新不再现场执行模型生成配方。灯光、文字、商品价格、选择动画与交互仍由运行时创建。修改模型配方后运行 `godot --headless --path . res://src/tools/bake_counter_geometry.tscn` 重建资源，再运行 `tests/counter_geometry_test.tscn` 对比全部网格数组、变换、材质参数和投影边界。`tests/menu_shop_loading_test.tscn -- --capture` 检查正常动画、减少动态效果下开始冒险后从暂停菜单返回，以及首次和重复进入商店的耗时与完整显示。
+
 `tests/object_stage_test.tscn -- --capture` 验证正常动画、确认防连点、结算、布局、减少动态效果和场景释放；`tests/journey_ui_test.tscn -- --capture` 对照原始固定种子并检查完整界面流程。实机图见 `docs/art-concepts/2026-10-16/object-menus/`。触控区域按 960×432 窗口验证最低 48 屏幕像素；移动设备性能仍需在目标设备测试。

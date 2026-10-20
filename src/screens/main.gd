@@ -4,6 +4,8 @@ extends Control
 ## 支持命令行自定义起始字袋（调试 / 自定义模式）：
 ##   godot --path . -- --deck 火火电电防防        # 逐字；也支持 火x2,电x2
 ##   godot --path . -- --deck-file res://deck.json  # JSON 数组 ["火","火","电"] 或 {"deck":"火火电"}
+# Retain script dependencies from startup; they must not be parsed on shop entry.
+const SHOP_SCRIPT := preload("res://src/screens/shop_screen.gd")
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -21,6 +23,8 @@ func _ready() -> void:
 		Router.goto("res://src/screens/map_screen.gd")
 		return
 	Router.goto("res://src/screens/title_screen.gd")
+	# Decode shared counter meshes while the player is on the title screen.
+	preload("res://src/ui/object_stage/counter_assets.gd").warm(get_tree())
 
 
 func _deck_from_cmdline() -> Array:

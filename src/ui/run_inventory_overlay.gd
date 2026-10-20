@@ -1,12 +1,16 @@
 extends Control
 ## 只读行囊：牌库按永久实体逐枚展示，不合并有不同强化的同名字。
 var initial_tab := "deck"
+var initial_relic := ""
+var selected_relic := ""
+var _relic_detail: VBoxContainer
 var _tab := ""
 var _body: VBoxContainer
 var _tabs: Dictionary = {}
 var _summary: Label
 var _was_paused := false
 var _previous_focus: Control
+var _touch_scale := -1.0
 
 
 func _ready() -> void:
@@ -57,6 +61,9 @@ func _ready() -> void:
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_body)
 	show_tab(initial_tab if _tabs.has(initial_tab) else "deck")
+	resized.connect(_sync_scale.call_deferred)
+	get_window().size_changed.connect(_sync_scale.call_deferred)
+	_sync_scale()
 	close.grab_focus()
 
 
@@ -73,16 +80,71 @@ func show_tab(tab: String) -> void:
 				_entry("%s · %s　#%d" % [inst.glyph(), inst.data.pinyin, inst.uid], inst.describe())
 		"relics":
 			if GameState.relics.is_empty(): _entry("暂无遗物", "获得的遗物会按获得顺序显示在这里和常驻栏中。")
-			for id: String in GameState.relics:
-				var body := Relics.desc_of(id)
-				if Relics.needs_bind(id):
-					var inst := GameState.relic_bound_inst(id)
-					body += "\n绑定：【%s】 #%d" % [inst.glyph(), inst.uid] if inst != null else "\n绑定的字不在牌库中，当前不生效。"
-				if id == "egg":
-					var interval := maxi(1, BattleBalance.i("egg_interval", Relics.EGG_EVERY))
-					body += "\n获胜进度：%d / %d" % [int(GameState.relic_counters.get(id, 0)) % interval, interval]
-				_entry(Relics.name_of(id), body)
+			else: _build_relics()
 		"gold": _entry("铜钱 %d" % GameState.gold, "本局当前持有的铜钱，可在商店和部分事件中使用。")
+
+
+func _build_relics() -> void:
+	_relic_detail = Ink.vbox(8)
+	_body.add_child(_relic_detail)
+	var grid := HFlowContainer.new()
+	grid.name = "OwnedRelicModels"
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	_body.add_child(grid)
+	var scale := JourneyStyle.touch_scale(self)
+	for id: String in GameState.relics:
+		var button := JourneyStyle.button("", _select_relic.bind(id))
+		button.set_meta("relic_id", id)
+		button.tooltip_text = Relics.text(id)
+		button.custom_minimum_size = Vector2.ONE * 88 * scale
+		grid.add_child(button)
+		var preview := preload("res://src/ui/relic_preview.gd").new()
+		preview.relic_id = id
+		button.add_child(preview)
+		preview.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+		button.mouse_entered.connect(preview.highlight.bind(true))
+		button.mouse_exited.connect(preview.highlight.bind(false))
+	_select_relic(selected_relic if GameState.relics.has(selected_relic) else (initial_relic if GameState.relics.has(initial_relic) else GameState.relics[0]))
+
+
+func _sync_scale() -> void:
+	if not is_inside_tree(): return
+	var factor := JourneyStyle.touch_scale(self)
+	if is_equal_approx(factor, _touch_scale): return
+	_touch_scale = factor
+	JourneyStyle.apply(self)
+	for button in find_children("*", "Button", true, false):
+		button.custom_minimum_size = Vector2.ONE * 88 * factor if button.has_meta("relic_id") else Vector2(0,48*factor)
+	for effect in find_children("*", "RichTextLabel", true, false):
+		if effect is EffectText: effect.add_theme_font_size_override("normal_font_size", int(17*factor))
+	if _tab == "relics" and GameState.relics.has(selected_relic): _select_relic(selected_relic)
+
+
+func _select_relic(id: String) -> void:
+	if not GameState.relics.has(id): return
+	selected_relic = id
+	for child in _relic_detail.get_children():
+		_relic_detail.remove_child(child)
+		child.queue_free()
+	var scale := JourneyStyle.touch_scale(self)
+	var preview := preload("res://src/ui/relic_preview.gd").new()
+	preview.relic_id = id
+	preview.custom_minimum_size = Vector2(0, minf(180 * scale, size.y * 0.28))
+	_relic_detail.add_child(preview)
+	var title := JourneyStyle.label(Relics.name_of(id), "Subheading", JourneyStyle.GOLD)
+	_relic_detail.add_child(title)
+	var body := Relics.desc_of(id)
+	if Relics.needs_bind(id):
+		var inst := GameState.relic_bound_inst(id)
+		body += "\n绑定：【%s】 #%d" % [inst.glyph(), inst.uid] if inst != null else "\n绑定的字不在牌库中，当前不生效。"
+	if id == "egg":
+		var interval := maxi(1, BattleBalance.i("egg_interval", Relics.EGG_EVERY))
+		body += "\n获胜进度：%d / %d" % [int(GameState.relic_counters.get(id, 0)) % interval, interval]
+	var effects := EffectText.new()
+	effects.set_effect_text(body)
+	effects.add_theme_font_size_override("normal_font_size", int(17 * scale))
+	_relic_detail.add_child(effects)
 
 
 func _entry(title: String, body: String) -> void:

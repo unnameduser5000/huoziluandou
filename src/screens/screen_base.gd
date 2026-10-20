@@ -37,7 +37,9 @@ func _ready() -> void:
 	if has_run_inventory():
 		inventory_bar = preload("res://src/ui/run_inventory.gd").new()
 		inventory_bar.screen = self
-		add_child(inventory_bar)
+		var host := run_inventory_host()
+		inventory_bar.embedded = host != self
+		host.add_child(inventory_bar)
 	resized.connect(_layout_inventory_bar)
 	_layout_inventory_bar()
 	if has_method("_layout"):
@@ -50,6 +52,9 @@ func _layout_inventory_bar() -> void:
 	# when a window resize changes the inventory height.
 	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if not is_instance_valid(inventory_bar): return
+	if inventory_bar.embedded:
+		inventory_bar.update_scale()
+		return
 	var height := 64.0 * clampf(JourneyStyle.touch_scale(self), 1.0, 1.85)
 	var safe := ScreenLayout.safe_rect(self)
 	inventory_bar.position = safe.position
@@ -60,6 +65,11 @@ func _layout_inventory_bar() -> void:
 
 func has_run_inventory() -> bool:
 	return true
+
+
+## Pages with their own header can include the inventory in that same row.
+func run_inventory_host() -> Control:
+	return self
 
 
 

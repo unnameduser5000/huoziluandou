@@ -123,7 +123,7 @@ func _build_loot(root: Control) -> void:
 	_gold_offer.tooltip_text = "放弃本次活字奖励，换取 %d 铜钱。" % Expedition.SKIP_GOLD
 	_gold_offer.clicked.connect(_take_gold)
 	root.add_child(_gold_offer)
-	_relic_ids = [_relic_taken] if not _relic_taken.is_empty() else _relic_choices.duplicate()
+	_relic_ids = _relic_choices.duplicate() if _relic_pending else []
 	for i in _relic_ids.size():
 		var id: String = _relic_ids[i]
 		_relic_objects.append(_showcase.stage.add_reward_relic(id, i, _relic_ids.size()))
@@ -283,14 +283,15 @@ func _on_relic_taken(id: String) -> void:
 	if _room_run and GameState.room_run == _reward_owner and _reward_owner.current_room == _reward_room:
 		_reward_owner.contents[_reward_room]["battle_relic_taken"] = id
 		_reward_owner._save_if_enabled()
-	for i in _relic_objects.size():
-		var keep: bool = _relic_ids[i] == id
-		_showcase.stage.objects[_relic_objects[i]].visible = keep
-		_relic_offers[i].visible = keep
-		if keep:
-			_showcase.stage.restore_object(_relic_objects[i])
-			_relic_offers[i]._caption.text = "已领 · " + Relics.name_of(id)
-			_layout_loot_offer(_relic_offers[i], _relic_objects[i])
+	while not _relic_objects.is_empty(): _showcase.stage.remove_object(_relic_objects.pop_back())
+	for offer in _relic_offers:
+		offer.get_parent().remove_child(offer)
+		offer.queue_free()
+	_relic_offers.clear()
+	_relic_ids.clear()
+	_selected_kind = "glyph"
+	_selected = -1
+	_hud.instruction_label.text = "选择一枚活字收入字袋，或不择字换铜钱。"
 	_hud.status_label.text = "气血 %d / %d    铜钱 %d" % [GameState.player_hp, GameState.player_max_hp, GameState.gold]
 	_set_busy(false)
 	_inspect(0)

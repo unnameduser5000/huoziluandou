@@ -27,6 +27,9 @@ var _page_margin := 24.0
 var _vertical := false
 var _layout_key := ""
 var _room_session: RefCounted
+var _deck_before: Dictionary = {}
+var _receipt_open := false
+var _tracking_gains := false
 
 const RELIC_CHANCE := 0.4
 
@@ -247,6 +250,8 @@ func _choose(index: int) -> void:
 	if _done or index < 0 or index >= _event.options.size(): return
 	if not EventEffects.option_available(_event.options[index]): return
 	_done = true
+	_deck_before = _deck_uids()
+	_tracking_gains = true
 	for button in _buttons: button.disabled = true
 	if is_instance_valid(_leave_button): _leave_button.disabled = true
 	if _room_session!=null:
@@ -280,6 +285,7 @@ func _leave_event() -> void:
 
 
 func _continue_effects() -> void:
+	if _show_received(_continue_effects): return
 	if _pending_effect.is_empty():
 		if GameState.player_hp > 0 and not _pending_relics.is_empty(): _show_relic_offer()
 		else: _finish()
@@ -371,6 +377,7 @@ func _show_relic_offer() -> void:
 
 
 func _finish() -> void:
+	if _show_received(_finish): return
 	if GameState.player_hp <= 0:
 		goto("res://src/screens/run_result_screen.gd", {"victory":false, "location":str(_event.get("title","")), "room_run":_room_session!=null})
 		return
@@ -386,6 +393,7 @@ func _finish() -> void:
 
 
 func _room_event_result(result: Dictionary) -> void:
+	if result.get("ok", false) and _show_received(_room_event_result.bind(result)): return
 	if _room_session.current() and _room_session.run.phase=="event_relic":
 		_show_relic_offer.call_deferred()
 		return
@@ -402,5 +410,40 @@ func _room_event_result(result: Dictionary) -> void:
 func _resume_room_choice() -> void:
 	if not _room_session.current() or _room_session.run.phase != "event_choose": return
 	_done = true
+	_deck_before = _deck_uids()
+	_tracking_gains = true
 	_body.text = str(_event.body)+"\n\n选择要删去的字（还需 %d 枚）。" % int(_room_session.run.pending_event_effect.get("remaining",1))
 	_room_session.pick(self,"选择要删去的字",_room_event_result)
+
+
+func _deck_uids() -> Dictionary:
+	var ids := {}
+	for inst: CharInstance in GameState.deck: ids[inst.uid] = true
+	return ids
+
+
+func _show_received(completed: Callable) -> bool:
+	if _receipt_open: return true
+	if not _tracking_gains: return false
+	var characters: Array = []
+	var counts := {}
+	for inst: CharInstance in GameState.deck:
+		if _deck_before.has(inst.uid): continue
+		if not counts.has(inst.glyph()): characters.append(inst.data)
+		counts[inst.glyph()] = int(counts.get(inst.glyph(), 0)) + 1
+	_deck_before = _deck_uids()
+	if characters.is_empty(): return false
+	_receipt_open = true
+	var receipt := CollectionOverlay.new()
+	receipt.name = "EventCharacterReceipt"
+	receipt.z_index = 100
+	receipt.setup({"title": "获得字卡", "subtitle": "以下字卡已加入字袋。", "characters": characters, "counts": counts, "close_text": "收好，继续"})
+	receipt.closed.connect(func():
+		_receipt_open = false
+		_continue_receipt.call_deferred(completed))
+	add_child(receipt)
+	return true
+
+
+func _continue_receipt(completed: Callable) -> void:
+	if is_inside_tree() and not is_queued_for_deletion() and Router.current == self: completed.call()

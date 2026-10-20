@@ -5,10 +5,20 @@ const Workshop := preload("res://src/ui/object_stage/relic_mesh.gd")
 const PIGMENT := preload("res://src/ui/object_stage/relic_pigment.gdshader")
 const FONT := preload("res://assets/fonts/LXGWWenKai-Regular.ttf")
 const Expansion := preload("res://src/ui/object_stage/relic_expansion.gd")
+const Geometry := preload("res://src/ui/object_stage/counter_assets.gd")
 const IDS := ["strike", "breach", "slab", "press", "sleep", "clean", "wheel", "powerbank", "fireman", "fertilizer", "skyfire", "blitz", "egg", "buckler", "barrier", "empty_case", "stay_wax", "amber", "ghost_hand", "cracked_bottle", "rotting_fruit", "chaos_dice", "black_water", "life_lantern", "life_debt", "chain", "question", "goldleaf", "moon", "slot", "death", "ruin", "rubbing", "midas", "monkey", "palindrome", "binding", "proof", "vial"]
 
 
 static func build(stage: Node3D, id: String, price: int) -> Node3D:
+	var library: Resource = Geometry.get_geometry()
+	if library != null and library.relics.has(id):
+		var specimen: Node3D = library.relics[id].instantiate()
+		specimen.set_meta("price", price)
+		return specimen
+	return _build_authored(stage, id, price)
+
+
+static func _build_authored(stage: Node3D, id: String, price: int) -> Node3D:
 	var node := Node3D.new()
 	node.name = "Relic_" + id
 	node.set_meta("relic_id", id)

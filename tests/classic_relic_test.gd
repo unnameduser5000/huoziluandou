@@ -28,7 +28,7 @@ func open_reward(type: MapNodeData.Type) -> Control:
 	node.type = type
 	Router.goto("res://src/screens/reward_screen.gd", {"node": node})
 	await frames()
-	if Router.current._relic_pending:
+	if Router.current_path.ends_with("reward_screen.gd") and Router.current._relic_pending:
 		Router.current._secondary_action()
 		await frames()
 	return Router.current
@@ -77,6 +77,7 @@ func _run() -> void:
 	var before := GameState.deck_size()
 	var node_before := GameState.node_index
 	check(reward._options.size() == 3, "normal reward offers three glyphs")
+	reward._inspect(0)
 	reward._accept_pick()
 	await frames()
 	check(GameState.deck_size() == before + 1 and GameState.node_index == node_before + 1 and Router.current_path.ends_with("map_screen.gd"), "one pick settles once and leaves without a second round")
@@ -153,6 +154,7 @@ func _run() -> void:
 	GameState.start_new_run()
 	own_all_but([])
 	reward = await open_reward(MapNodeData.Type.BOSS)
+	reward._inspect(0)
 	check(overlay(ChoiceOverlay) == null and not reward._hud.action_button.disabled, "exhausted relic pool never blocks reward")
 	GameState.start_new_run()
 	GameState.act_index = 3

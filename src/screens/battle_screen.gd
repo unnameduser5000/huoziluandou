@@ -2545,8 +2545,7 @@ func _open_battle_guide_ready() -> void:
 	if not is_inside_tree(): return
 	var body := "当前遗物：\n"
 	if battle.relics.is_empty(): body += "暂无遗物。\n\n"
-	else:
-		for id in battle.relics: body += Relics.text(id) + "\n\n"
+	else: body += "点击上方遗物模型查看具体效果。\n\n"
 	body += "触屏操作：\n点按字块选择单字；沿相邻字块滑动可预览词语。\n"
 	body += "松手后会尝试出字。\n" if Settings.drag_release_play else "松手只预览，点「出字」才会执行。\n"
 	body += "\n点按敌人可选择目标；需要目标的词请按提示选择，再点「发动」。状态图标、敌人意图、防御图标与资源均可点按查看详情；带下划线的词条可点按阅读。"

@@ -28,6 +28,15 @@ static func show_details(host: Control, title: String, body: String) -> ChoiceOv
 	return overlay
 
 
+static func show_relic_details(host: Control, id: String) -> ChoiceOverlay:
+	var overlay := ChoiceOverlay.new()
+	overlay.setup({"title":Relics.name_of(id), "relic_id":id, "body":Relics.desc_of(id), "hud_details":true, "scroll_body":true, "dismissible":true, "options":[{"text":"关闭", "primary":true}]})
+	overlay.z_index = 100
+	if host.has_method("_mount_overlay"): host.call("_mount_overlay", overlay)
+	else: host.add_child(overlay)
+	return overlay
+
+
 func setup(p_cfg: Dictionary) -> void:
 	cfg = p_cfg
 
@@ -81,7 +90,10 @@ func _build() -> void:
 		if RelicArt.texture(relic_id) != null:
 			var header := HBoxContainer.new()
 			header.add_theme_constant_override("separation", int(10 * hud_scale))
-			header.add_child(RelicArt.icon(relic_id, 72 * hud_scale))
+			var preview := preload("res://src/ui/relic_preview.gd").new()
+			preview.relic_id = relic_id
+			preview.custom_minimum_size = Vector2.ONE * 72 * hud_scale
+			header.add_child(preview)
 			heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			header.add_child(heading)
@@ -93,10 +105,16 @@ func _build() -> void:
 		var specimens := HFlowContainer.new()
 		for id in relic_ids:
 			if RelicArt.texture(str(id)) == null: continue
-			var picture := RelicArt.icon(str(id), 56 * hud_scale)
-			picture.mouse_filter = Control.MOUSE_FILTER_PASS
-			picture.tooltip_text = Relics.text(str(id))
-			specimens.add_child(picture)
+			var button := Button.new()
+			button.set_meta("relic_id", str(id))
+			button.custom_minimum_size = Vector2.ONE * 56 * hud_scale
+			button.tooltip_text = Relics.text(str(id))
+			button.pressed.connect(ChoiceOverlay.show_relic_details.bind(self,str(id)))
+			specimens.add_child(button)
+			var preview := preload("res://src/ui/relic_preview.gd").new()
+			preview.relic_id = str(id)
+			button.add_child(preview)
+			preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		col.add_child(specimens)
 	if not str(cfg.get("body", "")).is_empty():
 		var b: Control

@@ -20,15 +20,9 @@ var _main_buttons: Array[Button] = []
 func set_route_active(active: bool) -> void:
 	visible = active
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
-	if not active:
-		_starting = false
-		if is_instance_valid(_entry_timer): _entry_timer.stop()
-		if _menu_tween != null: _menu_tween.kill()
-	else:
-		if is_instance_valid(_menu): _menu.modulate.a = 1.0
-		if is_instance_valid(_veil): _veil.color.a = 0.0
-		_refresh_continue()
-		_lock_buttons()
+	_reset_entry()
+	if active: _refresh_continue()
+	if active and _modal_count == 0 and not _buttons.is_empty(): _buttons[0].grab_focus.call_deferred()
 	if is_instance_valid(_courtyard):
 		_courtyard.set_active(active)
 		if active: _courtyard.reset_camera()
@@ -187,16 +181,23 @@ func _on_expedition() -> void:
 
 func _cancel_entry() -> void:
 	if not _starting: return
-	_expedition = false
-	_entry_timer.stop()
-	_starting = false
-	if _menu_tween != null: _menu_tween.kill()
-	_menu.modulate.a = 1.0
-	_wordmark.show(); _ornament.show(); _utilities.show()
-	_veil.color.a = 0.0
+	_reset_entry()
 	_courtyard.reset_camera()
-	_lock_buttons()
 	_buttons[0].grab_focus.call_deferred()
+
+
+func _reset_entry() -> void:
+	# The title is retained by Router, so restore every part hidden by _on_start.
+	_expedition = false
+	_starting = false
+	if is_instance_valid(_entry_timer): _entry_timer.stop()
+	if _menu_tween != null: _menu_tween.kill()
+	if is_instance_valid(_menu): _menu.modulate.a = 1.0
+	if is_instance_valid(_wordmark): _wordmark.show()
+	if is_instance_valid(_ornament): _ornament.show()
+	if is_instance_valid(_utilities): _utilities.show()
+	if is_instance_valid(_veil): _veil.color.a = 0.0
+	_lock_buttons()
 
 
 func _mount_overlay(overlay: Control) -> void:

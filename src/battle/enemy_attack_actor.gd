@@ -28,7 +28,7 @@ var _rest_actor: RosterEnemyActor
 
 
 static func available(id: String) -> bool:
-	return EnemyAttackProfiles.DATA.has(id) and ResourceLoader.exists(ROOT + id + ".tres")
+	return not EnemyAnimationCatalog.DATA.has(id) and EnemyAttackProfiles.DATA.has(id) and ResourceLoader.exists(ROOT + id + ".tres")
 
 
 func _ready() -> void:

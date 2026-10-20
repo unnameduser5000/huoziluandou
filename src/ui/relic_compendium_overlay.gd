@@ -43,7 +43,15 @@ func _card(id: String) -> Control:
 	var inner := Ink.vbox(6)
 	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	holder.add_child(inner)
-	inner.add_child(RelicArt.icon(id, 72 * JourneyStyle.touch_scale(self)))
+	var model := Button.new()
+	model.custom_minimum_size.y = 100 * JourneyStyle.touch_scale(self)
+	model.tooltip_text = Relics.text(id)
+	model.pressed.connect(ChoiceOverlay.show_relic_details.bind(self,id))
+	inner.add_child(model)
+	var preview := preload("res://src/ui/relic_preview.gd").new()
+	preview.relic_id = id
+	model.add_child(preview)
+	preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var title := Ink.label(Relics.name_of(id), "Subheading", JourneyStyle.GOLD)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inner.add_child(title)

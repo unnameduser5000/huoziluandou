@@ -41,8 +41,20 @@ func _run() -> void:
 			check(screen.content.position.is_equal_approx(Vector2.ZERO) and screen.content.size.is_equal_approx(screen.size), page + " keeps the full content area without an empty inventory strip")
 			continue
 		check(bar.is_visible_in_tree() and bar.buttons.size() == 3 and not bar.buttons.has("tray"), page + " exposes deck, relics and coins without a tray entry")
-		check(screen.content.position.y >= bar.size.y - 1, page + " reserves space for inventory bar")
-		check(bar._relics.get_child_count() == 1 and bar._relics.get_child(0).text == Relics.name_of("strike"), page + " displays owned relics")
+		if page == "room_map":
+			check_map_header(screen)
+			get_window().size = Vector2i(960, 432)
+			await frames(12)
+			check_map_header(screen)
+			if OS.get_cmdline_user_args().has("--capture-map-header") and DisplayServer.get_name() != "headless":
+				await RenderingServer.frame_post_draw
+				DirAccess.make_dir_recursive_absolute("res://shots")
+				get_viewport().get_texture().get_image().save_png("res://shots/map-unified-header-phone.png")
+			get_window().size = Vector2i(1280, 720)
+			await frames(12)
+		else:
+			check(screen.content.position.y >= bar.size.y - 1, page + " reserves space for inventory bar")
+		check(bar._relics.get_child_count() == 1 and bar._relics.get_child(0).get_meta("relic_id") == "strike" and bar._relics.get_child(0).get_child_count() == 1, page + " displays an owned relic as a 3D preview")
 		var before := [GameState.gold, GameState.deck.duplicate(), GameState.rng.state, CharInstance._next_uid]
 		for tab in ["deck", "relics", "gold"]:
 			bar.buttons[tab].pressed.emit()
@@ -86,3 +98,18 @@ func _run() -> void:
 	await frames()
 	print("[run_inventory_test] PASS=%d FAIL=%d" % [checks-failures, failures])
 	get_tree().quit(1 if failures else 0)
+
+
+func check_map_header(screen: Control) -> void:
+	var bar: Control = screen.inventory_bar
+	var row: Rect2 = screen._header.get_global_rect()
+	check(bar.embedded and screen.content.position.is_equal_approx(Vector2.ZERO), "map integrates inventory without reserving a second header strip")
+	check(screen.get_viewport_rect().encloses(row), "map unified header fits the viewport")
+	check(not screen._stats.text.contains("铜钱") and screen._header.find_children("*", "Button", true, false).filter(func(b): return b.text == "字袋").is_empty(), "map has one coin display and one deck entry")
+	var controls: Array = [screen._act_title, screen._stats, screen._header.get_child(-1)] + bar.buttons.values()
+	for control: Control in controls:
+		var rect := control.get_global_rect()
+		check(row.grow(1).encloses(rect) and absf(rect.get_center().y - row.get_center().y) < 1, "map header aligns " + control.name + " in one row")
+	for button: Button in bar.buttons.values():
+		var pixels := Vector2(screen.get_window().size) / screen.get_viewport_rect().size
+		check(button.size.y * pixels.y >= 47.9, "map inventory retains a physical 48px touch target")

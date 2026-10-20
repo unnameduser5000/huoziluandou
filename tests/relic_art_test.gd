@@ -23,7 +23,7 @@ func choice() -> ChoiceOverlay:
 func pictures(node: Node) -> Array:
 	var result: Array = []
 	for child in node.get_children():
-		if child is TextureRect and child.has_meta("relic_id"): result.append(child)
+		if child.get_script() == preload("res://src/ui/relic_preview.gd"): result.append(child)
 		result.append_array(pictures(child))
 	return result
 
@@ -80,7 +80,7 @@ func _run() -> void:
 	await frames()
 	var dialog := choice()
 	var art := pictures(dialog)
-	check(art.size() == 1 and art[0].texture == RelicArt.texture(id), "purchase confirmation depicts the exact stocked relic")
+	check(art.size() == 1 and art[0].specimen.get_meta("relic_id") == id, "purchase confirmation depicts the exact stocked 3D relic")
 	await shot("purchase-1280")
 	dialog._on_choose(0)
 	await frames()

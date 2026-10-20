@@ -3,6 +3,7 @@ extends Node3D
 const Workshop := preload("res://src/title/courtyard/mesh_workshop.gd")
 const PIGMENT := preload("res://src/ui/object_stage/pigment.gdshader")
 const OUTLINE := preload("res://src/title/courtyard/ink_outline.gdshader")
+const Geometry := preload("res://src/ui/object_stage/counter_assets.gd")
 var mode := "reward"
 var reward_count := 3
 var reward_loot_layout := false
@@ -22,9 +23,13 @@ var shop_actions: Dictionary = {}
 
 func _ready() -> void:
 	_build_light()
-	_build_room()
-	_build_counter()
-	if mode == "shop": _build_shop_joinery()
+	if mode == "shop":
+		var interior: Node3D = Geometry.get_geometry().shop.instantiate()
+		add_child(interior)
+		_lantern = interior.get_node("CounterLantern")
+	else:
+		_build_room()
+		_build_counter()
 	if mode == "shop": _build_shop_actions()
 	Settings.changed.connect(_apply_motion)
 	_apply_motion()
@@ -392,8 +397,35 @@ func clear_objects() -> void:
 	object_scales.clear()
 
 
+func remove_object(index: int) -> void:
+	if index < 0 or index >= objects.size(): return
+	if _motions.has(index) and _motions[index].is_valid(): _motions[index].kill()
+	var remaining := {}
+	for key in _motions:
+		if key != index: remaining[key - 1 if key > index else key] = _motions[key]
+	_motions = remaining
+	var object := objects[index]
+	remove_child(object)
+	object.queue_free()
+	objects.remove_at(index)
+	rests.remove_at(index)
+	object_scales.remove_at(index)
+	if _selected == index: _selected = -1
+	elif _selected > index: _selected -= 1
+
+
 func add_object(glyph: String, slot: int, rank := 0, service := false) -> int:
 	var node := Node3D.new()
+	if mode == "shop":
+		var library: Resource = Geometry.get_geometry()
+		if service:
+			node.free()
+			node = library.service.instantiate()
+		elif rank >= 0 and rank < library.tokens.size():
+			node.free()
+			node = library.tokens[rank].instantiate()
+		else: _author_token(node, rank, service)
+	else: _author_token(node, rank, service)
 	var shop_slots := [Vector3(-4.6, 1.075, -0.30), Vector3(-2.85, 1.075, -0.30), Vector3(-1.1, 1.075, -0.30), Vector3(0.65, 1.075, -0.30), Vector3(2.4, 1.075, -0.30), Vector3(4.15, 0.65, 0.7), Vector3(5.6, 0.65, 0.7), Vector3(4.8, 1.75, -0.55)]
 	node.position = shop_slots[slot % shop_slots.size()] if mode == "shop" else Vector3((slot - (reward_count - 1) * 0.5) * minf(2.85, 8.8 / reward_count), 1.0, 0.1)
 	if mode == "reward" and reward_loot_layout:
@@ -401,9 +433,20 @@ func add_object(glyph: String, slot: int, rank := 0, service := false) -> int:
 		node.scale = Vector3.ONE * 0.84
 	if mode == "shop" and not service: node.scale = Vector3.ONE * 0.78
 	add_child(node)
+	if mode == "reward" and reward_loot_layout:
+		node.set_meta("reward_bounds", AABB(Vector3(-1.07, 0, -0.23), Vector3(2.14, 2.55, 0.65)))
+	var b := 0.53 if service else 1.0
+	var text := _text(glyph, 200, Color("14272b") if not service else Color("e4cf9b"), 0.008 * b)
+	text.position = Vector3(0, 0.75, 0.24) if service else Vector3(0, 1.42, 0.35)
+	node.add_child(text)
+	objects.append(node)
+	rests.append(node.position)
+	object_scales.append(node.scale)
+	return objects.size() - 1
+
+
+func _author_token(node: Node3D, rank: int, service: bool) -> void:
 	var w := Workshop.new()
-	var scale_factor := 0.53 if service else 1.0
-	var b := scale_factor
 	if service:
 		w.cylinder(Vector3(0, 0.10, 0), 0.53, 0.18, pigment("ink"))
 		w.cylinder(Vector3(0, 0.53, 0), 0.16, 0.8, pigment("gold"), 0.7)
@@ -431,15 +474,6 @@ func add_object(glyph: String, slot: int, rank := 0, service := false) -> int:
 		for i in rank + 1:
 			w.box(Vector3((i - rank * 0.5) * 0.16, 2.43, 0.23), Vector3(0.055, 0.04, 0.05), pigment("gold"))
 	w.finish(node)
-	if mode == "reward" and reward_loot_layout:
-		node.set_meta("reward_bounds", AABB(Vector3(-1.07, 0, -0.23), Vector3(2.14, 2.55, 0.65)))
-	var text := _text(glyph, 200, Color("14272b") if not service else Color("e4cf9b"), 0.008 * b)
-	text.position = Vector3(0, 0.75, 0.24) if service else Vector3(0, 1.42, 0.35)
-	node.add_child(text)
-	objects.append(node)
-	rests.append(node.position)
-	object_scales.append(node.scale)
-	return objects.size() - 1
 
 
 func _text(value: String, font_size: int, color: Color, pixel_size: float) -> Label3D:

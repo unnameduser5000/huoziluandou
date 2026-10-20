@@ -141,14 +141,14 @@ func _run() -> void:
 					if not pickers.is_empty(): pickers[0]._close()
 					await frames()
 				check(GameState.has_relic(id) and not screen._relic_pending and not screen._busy, "real model click grants the displayed relic and completes its continuation")
-				check(screen._relic_offers.filter(func(offer): return offer.visible).size() == 1 and run.contents[run.current_room].battle_relics.is_empty(), "unselected relics leave the counter and the saved candidate list clears")
+				check(screen._relic_offers.is_empty() and screen._relic_objects.is_empty() and stage.objects.size() == screen._options.size() + 1 and run.contents[run.current_room].battle_relics.is_empty(), "all claimed relic models and targets leave the counter and the saved candidate list clears")
 				check(GameState.gold == gold and GameState.deck_size() == before, "relic pickup never grants gold or a glyph twice")
 				check(run.save_run(SAVE) == OK, "claimed relic receipt saves")
 				run = RUN.restore(SAVE)
 				run.autosave = false
 				await open_reward(run)
 				screen = Router.current
-				check(not screen._relic_pending and screen._relic_taken == id and screen._relic_offers.size() == 1, "resume keeps the received 3D relic without rerolling or regranting")
+				check(not screen._relic_pending and screen._relic_taken == id and screen._relic_offers.is_empty() and screen._relic_objects.is_empty(), "resume keeps the receipt without respawning a claimed relic")
 			if kind == "battle" and resolution.x == 640:
 				var before := GameState.deck_size()
 				screen._inspect(1)
@@ -197,8 +197,7 @@ func _run() -> void:
 	var deadline := Time.get_ticks_msec() + 5000
 	while screen._busy and Time.get_ticks_msec() < deadline: await get_tree().process_frame
 	check(GameState.has_relic("ghost_hand") and not GameState.has_relic("moon") and not screen._relic_pending, "animated relic pickup grants only the selected candidate")
-	var index: int = screen._relic_objects[0]
-	check(screen._showcase.stage.objects[index].scale.is_equal_approx(screen._showcase.stage.object_scales[index]), "received relic restores its full model scale after the take animation")
+	check(screen._relic_objects.is_empty() and screen._relic_offers.is_empty() and screen._showcase.stage.objects.size() == screen._options.size() + 1, "received relic and unselected candidates disappear after the take animation")
 	screen._on_skip(); screen._on_skip()
 	check(screen._busy and GameState.gold == gold, "coin animation locks repeated clicks before granting gold")
 	deadline = Time.get_ticks_msec() + 5000

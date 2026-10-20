@@ -2,6 +2,7 @@ extends Node2D
 class_name RosterEnemyActor
 ## Illustration skin with anatomical joints; no gameplay state or random numbers.
 const CATALOG := preload("res://src/battle/enemy_animation_catalog.gd")
+const CHOREOGRAPHY := preload("res://src/battle/enemy_action_choreography.gd")
 const CLIPS := ["idle","attack","followup","special","guard","hit","death","phase"]
 var enemy_id := ""
 var texture_override: Texture2D
@@ -75,7 +76,7 @@ func skin_weights(uv: Vector2) -> Dictionary:
 		var weight := 0.0
 		if box.has_area():
 			var edge := minf(minf(uv.x-box.position.x,box.end.x-uv.x),minf(uv.y-box.position.y,box.end.y-uv.y))
-			weight = smoothstep(0,0.065,edge) * remaining
+			weight = smoothstep(0,0.11,edge) * remaining
 		weights[id] = weight
 		remaining -= weight
 	weights.Body = maxf(0,remaining)
@@ -139,7 +140,7 @@ func _build_animations() -> void:
 	idle.length = 3.2
 	idle.loop_mode = Animation.LOOP_LINEAR
 	var times := [0.0,0.8,1.6,2.4,3.2]
-	var breath := 0.0 if profile.kind in ["press","rail","official","slips","stone","roller","tribunal"] else 1.0
+	var breath := 0.0 if profile.kind in ["press","rail","official","slips","stone","roller","tribunal","guillotine"] else 1.0
 	_shift(idle,"Body",times,[Vector2.ZERO,Vector2(0,-0.004)*breath,Vector2.ZERO,Vector2(0,0.003)*breath,Vector2.ZERO])
 	_rotation(idle,"Head",times,[0.0,-0.012,0.0,0.009,0.0])
 	_rotation(idle,"LimbL",times,[0.0,0.012,0.0,-0.007,0.0])
@@ -188,6 +189,7 @@ func _build_animations() -> void:
 
 
 func _action_clip(action: String) -> Animation:
+	if action in ["attack", "followup"]: return CHOREOGRAPHY.build(self, action)
 	var clip := Animation.new()
 	var fast := 0.76 if action == "followup" else 1.0
 	clip.length = float(profile.length) * fast
@@ -199,6 +201,8 @@ func _action_clip(action: String) -> Animation:
 	if action == "phase": forward = Vector2(0,-0.028)
 	if profile.kind in ["official","rail"]: forward = Vector2.ZERO
 	match profile.kind:
+		"guillotine": forward = Vector2.ZERO
+		"crane": forward = Vector2(-0.018,0)
 		"stone": forward = Vector2(-0.012,0.004)*power
 		"edict": forward = Vector2(0,0.035)*power
 		"roller": forward = Vector2(-0.045,0)*power
@@ -209,6 +213,8 @@ func _action_clip(action: String) -> Animation:
 	var right := 0.20 * power
 	var detail := 0.08 * power
 	match profile.kind:
+		"crane": left = -0.08; right = 0.09; detail = 0.0
+		"guillotine": left = 0.0; right = 0.0; detail = 0.0
 		"debt": left = 0.08; right = -0.08; detail = 0.0
 		"stone": left = -0.05; right = -0.09; detail = 0.0
 		"edict": left = -0.045; right = 0.045; detail = 0.0
@@ -290,6 +296,9 @@ func set_phase(value: int) -> void:
 func action_global_position() -> Vector2:
 	var bone := "Head"
 	var tip: Vector2 = profile.head + Vector2(-0.08,0)
+	if profile.has("origin"):
+		bone = profile.origin_bone
+		tip = profile.origin
 	match profile.kind:
 		"debt": bone = "Body"; tip = Vector2(0.45,0.27)
 		"stone": bone = "LimbR"; tip = Vector2(0.90,0.59)

@@ -56,16 +56,8 @@ func _settled() -> void:
 	_ok(not _screen._busy, "攻击后恢复输入")
 
 
-func _poses_valid(actor: EnemyAttackActor) -> bool:
-	var valid := actor._frames.size() == 8 and is_equal_approx(actor.scale.x, actor.scale.y)
-	for i in actor._frames.size():
-		actor.pose_index = i
-		var vertices: PackedVector2Array = actor._skin.polygon
-		valid = valid and Geometry2D.triangulate_polygon(vertices).size() > 0
-		for p in vertices:
-			valid = valid and Rect2(Vector2.ZERO, actor.source_size).grow(3).has_point(p)
-	actor.pose_index = -1
-	return valid
+func _poses_valid(actor: RosterEnemyActor) -> bool:
+	return actor != null and actor.mesh.get_bone_count() == actor.bones.size() and actor.player.get_animation("attack").get_track_count() >= 7 and is_equal_approx(actor.scale.x, actor.scale.y)
 
 
 func _case(id: String, move_index: int, primary: bool) -> void:
@@ -80,11 +72,12 @@ func _case(id: String, move_index: int, primary: bool) -> void:
 	_screen._refresh_all()
 	await _frames(16)
 	await _settled()
-	var actor: EnemyAttackActor = _screen._enemy_widgets[0]._visual._attack_actor
+	var actor: RosterEnemyActor = _screen._enemy_widgets[0]._visual._character_actor
 	var move: EnemyMoveData = data.enemies[0].moves[move_index]
 	var hits: int = move.hits if move.kind == EnemyMoveData.Kind.MULTI else 1
-	_ok(actor != null and actor.enemy_id == id and actor._sheet.resource_path.ends_with("attacks/%s.png" % id), id + " 绑定自己的攻击画稿")
-	_ok(_poses_valid(actor), id + " 八个姿势轮廓有效且等比适配")
+	var portrait := TaopunkArt.portrait(id)
+	_ok(actor != null and actor.enemy_id == id and actor.mesh.texture == (portrait.atlas if portrait is AtlasTexture else portrait), id + " 攻击与待机使用同一当前立绘")
+	_ok(_poses_valid(actor), id + " 连续关节动作等比适配")
 	if hits > 1: _ok(_poses_valid(actor), id + " 连击姿势轮廓有效")
 	if primary:
 		var state := battle.rng.state
@@ -99,7 +92,7 @@ func _case(id: String, move_index: int, primary: bool) -> void:
 	await _settled()
 	_ok(before - battle.player.hp == move.damage * hits, "%s %s：真实伤害保持 %d × %d" % [id, move.title, move.damage, hits])
 	_ok(_observed_effects.size() == hits, id + " 每次实际命中发出独立材质轨迹")
-	_ok(started.count("followup") == hits - 1 and started.has("slam" if move.kind == EnemyMoveData.Kind.ATTACK_BLOCK else "attack"), id + " 每次实际命中有独立发力，防御不冒充攻击")
+	_ok(started.count("followup") == hits - 1 and started.has("attack"), id + " 每次实际命中有独立发力，防御不冒充攻击")
 	_ok(_screen._enemy_attack_context.is_empty() and actor.player.current_animation == "idle", id + " 回收后回到待机并清理演出上下文")
 	if primary:
 		get_window().size = Vector2i(844, 390)
@@ -113,12 +106,12 @@ func _case(id: String, move_index: int, primary: bool) -> void:
 		Settings.reduced_motion = true
 		await _frames(2)
 		var resting := not actor.player.is_playing()
-		resting = resting and actor.pose_index == -1
+		resting = resting and actor.bones.Body.position.is_equal_approx(actor._rest.Body)
 		_ok(resting, id + " 减少动效恢复原姿态")
 		Settings.reduced_motion = false
 		await _frames(2)
 		actor.defeated = true
-		await _frames(2)
+		await get_tree().create_timer(1.2).timeout
 		_ok(not actor.player.is_playing(), id + " 击败后停止待机")
 
 

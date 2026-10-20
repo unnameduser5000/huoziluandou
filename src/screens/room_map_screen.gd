@@ -16,6 +16,7 @@ var _hint: Label
 var _tools: HBoxContainer
 var _page: VBoxContainer
 var _header: HBoxContainer
+var _inventory_slot: HBoxContainer
 var _selected := ""
 var _routing := false
 var _receipt_open := false
@@ -31,10 +32,13 @@ func build(root: Control) -> void:
 	_page = page; _header = header
 	var act: ActData = Database.get_act(GameState.act_index)
 	_act_title = JourneyStyle.label(act.title if act!=null else "炼字狱", "Heading")
+	_act_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_act_title)
-	header.add_child(Ink.expander())
+	_inventory_slot = Ink.hbox(0)
+	_inventory_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(_inventory_slot)
 	_stats = JourneyStyle.label("", "Stat"); header.add_child(_stats)
-	header.add_child(_button("字袋",_open_deck))
+	_stats.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_button("菜单",func(): PauseMenu.open()))
 	page.add_child(header)
 	map_view = VIEW.new(); map_view.run = run
@@ -72,6 +76,10 @@ func _button(caption: String, callback: Callable, primary := false) -> Button:
 	var button := JourneyStyle.button(caption,callback,primary)
 	button.custom_minimum_size.y = 48*JourneyStyle.touch_scale(self)
 	return button
+
+
+func run_inventory_host() -> Control:
+	return _inventory_slot
 
 
 func _quiet_button(caption: String, callback: Callable) -> Button:
@@ -165,7 +173,7 @@ func _on_hp(_hp: int, _max_hp: int) -> void: _update_stats()
 
 
 func _update_stats() -> void:
-	if is_instance_valid(_stats): _stats.text = "气血 %d / %d    铜钱 %d" % [GameState.player_hp,GameState.player_max_hp,GameState.gold]
+	if is_instance_valid(_stats): _stats.text = "气血 %d / %d" % [GameState.player_hp,GameState.player_max_hp]
 	if is_instance_valid(_act_title):
 		var act := Database.get_act(GameState.act_index)
 		_act_title.text = act.title if act!=null else "炼字狱"

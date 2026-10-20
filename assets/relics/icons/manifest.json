@@ -393,13 +393,13 @@
 	],
 	"renderer": "Godot orthographic shop pigments",
 	"source": "res://src/ui/object_stage/relic_specimen.gd",
-	"source_sha256": "d5f42d2112b470d8844e7f77bbcf681fc5f65ea6742f13334af1424e4746c856",
+	"source_sha256": "48ce2d3932e36b599bbd2949ae9a4d891995807992a7ac9203e3c6e875df5d52",
 	"sources": {
 		"res://src/tools/bake_relic_icons.gd": "ddf388c05a2bd3309fbdabe9f18ca2c004db474b4507d9f2d1fbe9cb984c4b87",
 		"res://src/ui/object_stage/relic_expansion.gd": "e1245e56eacf3b4a9936320f151ea94fc85fdf0883046f296422999dd8c52f98",
 		"res://src/ui/object_stage/relic_mesh.gd": "585389da04f7940e6446fa781277ed92d3b7b2e54dfb81bdfcf0e11c94b00430",
 		"res://src/ui/object_stage/relic_pigment.gdshader": "81a48ce67bd911e4e3194016104b1e4655e3c1be6014193687a0a66ae4ad853c",
-		"res://src/ui/object_stage/relic_specimen.gd": "d5f42d2112b470d8844e7f77bbcf681fc5f65ea6742f13334af1424e4746c856",
+		"res://src/ui/object_stage/relic_specimen.gd": "48ce2d3932e36b599bbd2949ae9a4d891995807992a7ac9203e3c6e875df5d52",
 		"res://src/ui/relic_art.gd": "7bfd8b682b953a78ba07cd18bd2ff17d1bdd0e2d62c8c40573770589d755646e",
 		"res://src/ui/relic_preview.gd": "a731c8f2d69e46ab0a1c1029e2b1cdbb5be46478c1dc5f1ca0a11926cbab8b17"
 	}

@@ -18,6 +18,7 @@ var description: EffectText
 var action_button: Button
 var secondary_button: Button
 var status_label: Label
+var instruction_label: Label
 var _body_scroll: ScrollContainer
 var _column: VBoxContainer
 var _pad: MarginContainer
@@ -46,6 +47,7 @@ func _ready() -> void:
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	titles.add_child(title)
 	var hint := JourneyStyle.label(instruction, "Muted")
+	instruction_label = hint
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	titles.add_child(hint)
 	hint.visible = factor <= 1.1
