@@ -36,6 +36,7 @@ static func start(seed_value := -1):
 	var run = load("res://src/expedition/room_run_state.gd").new()
 	if seed_value<0: seed_value = int(Time.get_unix_time_from_system()) ^ int(Time.get_ticks_usec())
 	run.reset({"seed":seed_value,"layout":"node_graph"})
+	GameState.first_run_tutorial = not Settings.first_run_tutorial_completed
 	run.autosave = not bool(GameState.get_meta("courtyard_preview",false))
 	if run.phase != "generation_error": Achievements.start_run("courtyard")
 	if run.autosave: run.save_run()
@@ -790,6 +791,7 @@ func save_run(path := SAVE_PATH) -> Error:
 	data.run["pending_event_relics"] = pending_event_relics.duplicate()
 	data.player = {"hp":GameState.player_hp,"max_hp":GameState.player_max_hp,"gold":GameState.gold,"sequence":GameState.battle_sequence,"relics":GameState.relics,"binds":GameState.relic_binds,"counters":GameState.relic_counters,"reduction":GameState.permanent_damage_reduction,"deck":[]}
 	data.player["revive_charges"] = GameState.revive_charges
+	data.player["first_run_tutorial"] = GameState.first_run_tutorial
 	for inst in GameState.deck:
 		data.player.deck.append({"uid":inst.uid,"data":inst.data,"gilded":inst.gilded,"upgrade":inst.upgrade_level,"modifiers":inst.modifiers.duplicate(),"pollutions":inst.pollutions.duplicate(),"fusion":inst.fusion.duplicate()})
 	return ResourceSaver.save(data,path)
@@ -855,6 +857,7 @@ static func restore(path := SAVE_PATH, as_nodes := false):
 	GameState.player_hp = player.hp; GameState.player_max_hp = player.max_hp; GameState.gold = player.gold
 	GameState.battle_sequence = player.sequence; GameState.relics = player.relics; GameState.relic_binds = player.binds; GameState.relic_counters = player.counters
 	GameState.revive_charges = int(player.get("revive_charges", 0))
+	GameState.first_run_tutorial = bool(player.get("first_run_tutorial", false)) and not Settings.first_run_tutorial_completed
 	GameState.permanent_damage_reduction = player.reduction
 	GameState.rng.state = state.rng
 	_restore_legacy_inventory(state)

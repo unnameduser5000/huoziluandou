@@ -145,23 +145,6 @@ func _preview_target(id: String) -> bool:
 	return run.graph.rooms.has(source) and not run.sealed.has(source) and not run.sealed.has(id) and run.graph.rooms[source].next.has(id)
 
 
-func _get_tooltip(at_position: Vector2) -> String:
-	var id := _hit(at_position)
-	if id.is_empty(): return ""
-	var status := _status(id)
-	return LABELS[run.graph.rooms[id].kind]+(" · "+status if not status.is_empty() else "")
-
-
-func _status(id: String) -> String:
-	if planning and run.planned_route.has(id): return "预选 %d" % (run.planned_route.find(id) + 1)
-	if planning and run.plan_choices().has(id): return "可预选"
-	if id==run.current_room: return "当前"
-	if run.visited_rooms.has(id): return "已过"
-	if run.sealed.has(id): return "已放弃"
-	if run.next_rooms().has(id): return "可前往"
-	return ""
-
-
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN] and event.pressed:

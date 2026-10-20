@@ -101,6 +101,7 @@ BATTLE_UI = [
     "motion_settings_test",
     "first_run_tutorial_test",
     "tutorial_interaction_test",
+    "tutorial_spotlight_test",
     "study_flow_test",
 ]
 

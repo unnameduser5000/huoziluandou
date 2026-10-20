@@ -56,6 +56,7 @@ func build(root: Control) -> void:
 	_menu.add_child(_button("开始新冒险", _on_start, true))
 	_continue_button = _button("继续冒险", _on_continue)
 	_menu.add_child(_continue_button)
+	_menu.add_child(_button("新手教程",_on_tutorial))
 	_refresh_continue()
 	SaveManager.availability_changed.connect(_refresh_continue)
 	_menu.add_child(_button("字库图鉴",_on_library))
@@ -171,6 +172,9 @@ func _finish_start() -> void:
 		Achievements.start_run("expedition")
 		goto("res://src/screens/expedition_map_screen.gd")
 		return
+	if not Settings.first_run_tutorial_completed:
+		goto("res://src/screens/tutorial_screen.gd", {"start_adventure": true})
+		return
 	load("res://src/expedition/room_run_state.gd").start()
 	goto("res://src/screens/room_map_screen.gd")
 
@@ -213,6 +217,10 @@ func _open_settings() -> void:
 
 func _on_custom() -> void:
 	if _can_interact(): goto("res://src/screens/custom_deck_screen.gd")
+
+
+func _on_tutorial() -> void:
+	if _can_interact(): goto("res://src/screens/tutorial_screen.gd")
 
 
 func _on_library() -> void:
