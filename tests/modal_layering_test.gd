@@ -43,7 +43,7 @@ func above_header(overlay: Control, bar: Control, label: String) -> void:
 	var button: Button = bar.buttons.deck
 	var motion := InputEventMouseMotion.new()
 	motion.position = button.get_global_rect().get_center()
-	get_viewport().push_input(motion)
+	get_viewport().push_input(motion, true)
 	await frames(2)
 	var hovered := get_viewport().gui_get_hovered_control()
 	check(hovered != null and (hovered==overlay or overlay.is_ancestor_of(hovered)), label+": resource buttons cannot receive pointer input behind modal")
@@ -98,7 +98,7 @@ func _run() -> void:
 				click.button_index = MOUSE_BUTTON_LEFT
 				click.pressed = pressed
 				click.position = point
-				get_viewport().push_input(click)
+				get_viewport().push_input(click, true)
 			await frames()
 			check(is_instance_valid(bar._overlay),tag+": resource button responds after menu closes")
 			if not is_instance_valid(bar._overlay): continue

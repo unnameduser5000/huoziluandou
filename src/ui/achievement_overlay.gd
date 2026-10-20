@@ -83,6 +83,7 @@ func _ready() -> void:
 
 func _label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.text = text
 	label.add_theme_font_override("font", Ink.serif)
 	label.add_theme_font_size_override("font_size", size)
@@ -132,6 +133,8 @@ func _card(definition: Dictionary, unlocked: bool) -> Control:
 	card.set_meta("achievement_id", definition.id)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.custom_minimum_size = Vector2(240, 205)
+	# 卡面不拦截鼠标/触摸：滚动交给外层 ScrollContainer
+	card.mouse_filter = Control.MOUSE_FILTER_PASS
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("163c3a") if unlocked else Color("102f31")
 	style.border_color = Color("9ba77b") if unlocked else Color("365452")
@@ -139,12 +142,15 @@ func _card(definition: Dictionary, unlocked: bool) -> Control:
 	style.set_content_margin_all(14)
 	card.add_theme_stylebox_override("panel", style)
 	var col := VBoxContainer.new()
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_theme_constant_override("separation", 7)
 	card.add_child(col)
 	var top := HBoxContainer.new()
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(top)
 	top.add_child(AchievementArt.icon(definition, 68, unlocked))
 	var names := VBoxContainer.new()
+	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(names)
 	var title := _label(AchievementArt.title(definition), 21, Color("e1d7b8"))
@@ -163,6 +169,7 @@ func _card(definition: Dictionary, unlocked: bool) -> Control:
 	bar.value = maximum if unlocked else amount
 	bar.show_percentage = false
 	bar.custom_minimum_size.y = 8
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(bar)
 	var prefix := "累计进度" if definition.scope == "lifetime" else "最高记录"
 	col.add_child(_label("%s：%d / %d" % [prefix, amount, maximum], 14, Color("a2b6aa")))

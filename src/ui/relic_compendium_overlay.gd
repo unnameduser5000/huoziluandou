@@ -40,7 +40,10 @@ func _card(id: String) -> Control:
 	var holder := Ink.card()
 	holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	holder.set_meta("relic_id", id)
+	# 卡面不拦截拖动，滚动交给外层 ScrollContainer（预览按钮仍可点开详情）
+	holder.mouse_filter = Control.MOUSE_FILTER_PASS
 	var inner := Ink.vbox(6)
+	inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	holder.add_child(inner)
 	var model := Button.new()

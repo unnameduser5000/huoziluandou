@@ -148,6 +148,10 @@ func _ready() -> void:
 	for card in overlay.grid.get_children():
 		for label in card.find_children("*", "Label", true, false): texts += label.text
 	check(texts.contains("已解锁") and texts.contains("未解锁") and texts.contains("达成条件") and texts.contains("最高记录") and texts.contains("需先解锁"), "总览明确状态、条件、最高进度与前置")
+	var first_card: Control = overlay.grid.get_child(0)
+	var blockers: Array = [first_card, first_card.get_child(0), first_card.get_child(0).get_child(0)]
+	check(blockers.all(func(n): return n.mouse_filter != Control.MOUSE_FILTER_STOP), "成就卡不拦截滚动事件")
+	check(overlay.scroll.get_v_scroll_bar().max_value > 0, "成就列表在可滚动容器里")
 	overlay.state_filter.select(1); overlay._refresh()
 	check(overlay.grid.get_child_count() == Achievements.profile.unlocked.size(), "已解锁筛选正确")
 	overlay.state_filter.select(2); overlay._refresh()
