@@ -161,8 +161,7 @@ static func words_for_glyph(glyph: String) -> Array:
 static func character_hint(character: CharacterData) -> String:
 	var words := words_for_glyph(character.glyph).slice(0, 4)
 	if words.is_empty(): return character.description
-	return character.description + "
-可组：" + " / ".join(words.map(func(word): return "【%s】" % word))
+	return character.description + "\n可组：" + " / ".join(words.map(func(word): return "【%s】" % word))
 
 
 static func brief(word: WordData) -> String:

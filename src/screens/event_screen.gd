@@ -264,16 +264,15 @@ func _choose(index: int) -> void:
 	if not result.get("ok", false):
 		_restore_choices(str(result.get("reason", "事件结算失败")))
 		return
-	for res_note in (result.get("notes", []) as Array):
-		var rn := str(res_note)
-		if not rn.is_empty() and not str(_event.get("body", "")).contains(rn):
-			_event["body"] = str(_event.get("body", "")) + "
-" + rn
-			_body.text = str(_event["body"])
+	var extra_notes: Array = (result.get("notes", []) as Array).duplicate()
 	var note := str(_event.options[index].get("append", ""))
-	if not note.is_empty() and not str(_event.get("body", "")).contains(note):
-		_event["body"] = str(_event.get("body", "")) + "
-" + note
+	if not note.is_empty():
+		extra_notes.append(note)
+	for res_note in extra_notes:
+		var rn := str(res_note)
+		if rn.is_empty() or str(_event.get("body", "")).contains(rn):
+			continue
+		_event["body"] = str(_event.get("body", "")) + "\n" + rn
 		_body.text = str(_event["body"])
 	_pending_effect = result.get("pending", {})
 	_pending_relics = result.get("relic_offers", [])
