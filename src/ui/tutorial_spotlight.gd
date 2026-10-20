@@ -4,6 +4,9 @@ var holes: Array[Rect2] = []
 var accents: Array[Rect2] = []
 var gesture := PackedVector2Array()
 var falls: Array = []
+var _callout := Rect2()
+var _target := Vector2.ZERO
+var _unit := 1.0
 var _elapsed := 0.0
 var _fade: Tween
 
@@ -34,6 +37,13 @@ func _has_point(point: Vector2) -> bool:
 	return true
 
 
+func point_at(callout: Rect2, target: Vector2, unit: float) -> void:
+	_callout = callout
+	_target = target
+	_unit = unit
+	queue_redraw()
+
+
 func _process(delta: float) -> void:
 	if Settings.reduced_motion: return
 	_elapsed += delta
@@ -55,6 +65,14 @@ func _draw() -> void:
 				if piece.has_area(): remaining.append(piece)
 		shade = remaining
 	for rect in shade: draw_rect(rect, Color(0.015, 0.035, 0.045, 0.76))
+	if _callout.has_area():
+		var center_y := clampf(_target.y, _callout.position.y + 20 * _unit, _callout.end.y - 20 * _unit)
+		var base := Vector2(_callout.end.x - 2 * _unit, center_y)
+		var tip := base + Vector2(10 * _unit, 0)
+		var upper := base - Vector2(0, 8 * _unit)
+		var lower := base + Vector2(0, 8 * _unit)
+		draw_colored_polygon(PackedVector2Array([upper, tip, lower]), JourneyStyle.SURFACE)
+		draw_polyline(PackedVector2Array([upper, tip, lower]), JourneyStyle.GOLD, 1.5 * _unit, true)
 	var pulse := 0.65 if Settings.reduced_motion else 0.65 + sin(_elapsed*3.0)*0.2
 	for rect in accents:
 		draw_style_box(_outline(Color(JourneyStyle.GOLD, pulse)), rect)

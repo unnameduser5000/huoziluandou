@@ -26,6 +26,9 @@ func frames(count := 6) -> void:
 func settle(screen: Control) -> void:
 	while screen._animating: await get_tree().process_frame
 	await frames()
+	if screen._lesson_overlay != null:
+		screen._lesson_overlay._next_btn.pressed.emit()
+		await frames()
 
 
 func shot(name: String) -> void:
@@ -48,6 +51,8 @@ func run() -> void:
 	Router.goto("res://src/screens/tutorial_screen.gd")
 	await frames(20)
 	var screen: Control = Router.current
+	screen._lesson_overlay._next_btn.pressed.emit()
+	await frames()
 	check(screen._enemy_art._actor != null and screen._enemy_art._actor.visible, "existing 墨灵 actor is active")
 	check(not screen._spotlight.gesture.is_empty(), "animated gesture targets the first glyph")
 	var elapsed: float = screen._spotlight._elapsed
@@ -83,12 +88,16 @@ func run() -> void:
 	BattleTouchLayout.test_dpi = 160
 	Settings.reduced_motion = true
 	screen._restart(); await frames(20)
+	screen._lesson_overlay._next_btn.pressed.emit()
+	await frames()
 	check(screen.get_global_rect().encloses(screen._enemy_card.get_global_rect()) and screen.get_global_rect().encloses(screen._guide_frame.get_global_rect()), "phone opponent and guidance stay onscreen")
 	check(not screen._board_view.get_global_rect().intersects(screen._guide_frame.get_global_rect()), "phone spotlight instructions do not cover the board")
 	await shot("phone-single")
 	for index in [0, 1]: screen._commit(screen.PATHS[index])
 	await frames(10)
 	await shot("phone-before-gravity")
+	screen._lesson_overlay._next_btn.pressed.emit()
+	await frames()
 	screen._commit(screen.PATHS[2]); await frames(10)
 	check(screen.step == 3 and not screen._animating, "reduced motion resolves gravity without a forced animation wait")
 	await shot("phone-after-gravity")

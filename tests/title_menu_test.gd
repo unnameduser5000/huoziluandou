@@ -66,7 +66,7 @@ func _run() -> void:
 	var names: Array = []
 	for button in title._buttons:
 		if button.visible: names.append(button.text)
-	var expected: Array = ["开始新冒险","新手教程","字库图鉴","成就总览","设置","离开","自定义构筑","字网图谱","旧版远征"]
+	var expected: Array = ["开始新冒险","新手教程","字库图鉴","成就总览","设置","离开","自定义构筑","字网图谱"]
 	if load("res://src/expedition/room_run_state.gd").has_continuable_save(): expected.insert(1,"继续冒险")
 	_ok(names == expected, "all existing title actions retained in the branded menu")
 	_ok(GameState.rng.state == rng_before, "title rendering leaves gameplay RNG untouched")

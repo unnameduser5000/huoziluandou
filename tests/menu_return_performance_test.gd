@@ -115,13 +115,13 @@ func _run() -> void:
 	_ok(counts.back() == counts[0], "ten repeated returns keep node count stable")
 	if not _baseline:
 		# Leaving during the timed start must cancel it even though the title stays alive.
-		title._on_expedition()
+		title._on_start()
 		Router.goto("res://src/screens/glyph_graph_screen.gd")
 		await get_tree().create_timer(2.2).timeout
 		_ok(Router.current_path.ends_with("/glyph_graph_screen.gd"), "suspended title cannot fire its old entry timer")
 		Router.goto(TITLE)
 		await _frames()
-		_ok(not title._expedition and not title._starting and title._modal_count == 0, "return clears entry and modal state")
+		_ok(not title._starting and title._modal_count == 0, "return clears entry and modal state")
 		# Settings changed away from title take effect when it is shown again.
 		Router.goto("res://src/screens/glyph_graph_screen.gd")
 		Settings.reduced_motion = true

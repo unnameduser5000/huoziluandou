@@ -47,6 +47,10 @@ func tap(control: Control) -> void:
 	await frames()
 
 
+func dismiss_lesson(screen: Control) -> void:
+	if screen._lesson_overlay != null: await tap(screen._lesson_overlay._next_btn)
+
+
 func cell(screen: Control, pos: Vector2i) -> Control:
 	return screen._board_view.tiles[screen.battle.board.from_xy(pos)]
 
@@ -82,6 +86,7 @@ func enter() -> Control:
 			break
 	await frames(10)
 	check(Router.current_path.ends_with("tutorial_screen.gd"), "title touch entry")
+	await dismiss_lesson(Router.current)
 	return Router.current
 
 
@@ -129,6 +134,7 @@ func profile(dimensions: Vector2i, dpi: float) -> void:
 	await shot(tag + "-02-word")
 	await tap(s._confirm_btn)
 	check(s.step == 2 and s.battle.enemies[0].hp == s.battle.enemies[0].max_hp - 12, tag + " word uses real eight damage")
+	await dismiss_lesson(s)
 	# The real board rejects this pair before gravity, then accepts the same entities.
 	var before_gravity := [Vector2i(1, 1), Vector2i(2, 2)]
 	check(not s.battle.inspect_play(before_gravity, {"target_index":0}).ok, tag + " separated word is illegal before gravity")
@@ -141,6 +147,7 @@ func profile(dimensions: Vector2i, dpi: float) -> void:
 	await shot(tag + "-04-after-gravity")
 	await drag(s, s.PATHS[3]); await tap(s._confirm_btn)
 	check(s.step == 4 and s.battle.enemies[0].hp == s.battle.enemies[0].max_hp - 20, tag + " player attacks with the word created by gravity")
+	await dismiss_lesson(s)
 	# Also cover sequential tapping, rather than drag only.
 	await tap(cell(s, s.PATHS[4][0])); await tap(cell(s, s.PATHS[4][1]))
 	await tap(s._confirm_btn)
@@ -153,6 +160,7 @@ func profile(dimensions: Vector2i, dpi: float) -> void:
 	untouched(tag + " completion")
 	await tap(s._replay_btn)
 	check(s.step == 0 and s.battle.board.fill_count() == 8 and s.battle.enemies[0].hp == s.battle.enemies[0].max_hp, tag + " replay resets local state")
+	await dismiss_lesson(s)
 	await tap(s._exit_btn)
 	check(Router.current_path.ends_with("title_screen.gd"), tag + " exit returns title")
 	untouched(tag + " exit")
@@ -180,6 +188,12 @@ func _run() -> void:
 	for p in [[Vector2i(1280, 720), 0], [Vector2i(960, 432), 160], [Vector2i(1280, 720), 320], [Vector2i(2400, 1080), 440], [Vector2i(2532, 1170), 460]]:
 		await profile(p[0], p[1])
 	var s := await enter()
+	s._restart()
+	await frames()
+	check(s._lesson_overlay != null and not s._board_view._interactable, "replay opens a blocking illustrated lesson")
+	s.notification(NOTIFICATION_WM_GO_BACK_REQUEST)
+	await frames()
+	check(s._lesson_overlay == null and s._board_view._interactable and s.step == 0, "Android back dismisses lesson without playing a card")
 	check(not get_tree().quit_on_go_back, "practice intercepts Android system back notification")
 	s._board_view._on_tile_pressed(Vector2i(0, 0))
 	s.notification(NOTIFICATION_WM_GO_BACK_REQUEST)
@@ -213,6 +227,7 @@ func _run() -> void:
 		for j in mini(i, 5):
 			s._commit(s.PATHS[j])
 			await frames()
+			await dismiss_lesson(s)
 		await frames()
 		PauseMenu.open()
 		await frames()

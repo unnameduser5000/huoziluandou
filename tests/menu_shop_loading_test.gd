@@ -63,7 +63,7 @@ func _run() -> void:
 		check(title._wordmark.is_visible_in_tree() and title._ornament.is_visible_in_tree() and title._utilities.is_visible_in_tree(), "return restores logo, menu ornament and utility entries")
 		check(title._menu.modulate.a == 1.0 and title._veil.color.a == 0.0 and title._can_interact(), "return restores menu opacity and interaction")
 		check(title._buttons[0].has_focus(), "return restores keyboard focus")
-		check(not title._expedition and title._entry_timer.is_stopped(), "return clears entry mode and timer")
+		check(not title._starting and title._entry_timer.is_stopped(), "return clears entry state and timer")
 		await shot("menu-return-%d" % round_index)
 	Settings.reduced_motion = true
 	for round_index in 3:
@@ -96,13 +96,12 @@ func _run() -> void:
 		await shot("shop-entry-%d" % round_index)
 		Router.goto(TITLE)
 		await frames()
-	# A suspended legacy start must not leak into the next normal start.
-	title._expedition = true
+	# A suspended start must not fire after returning to the title.
 	title._on_start()
 	Router.goto("res://src/screens/glyph_graph_screen.gd")
 	Router.goto(TITLE)
 	await frames()
-	check(not title._expedition and not title._starting and title._entry_timer.is_stopped(), "interrupted entry resets its mode and stops the timer")
+	check(not title._starting and title._entry_timer.is_stopped(), "interrupted entry resets its state and stops the timer")
 	check(title._wordmark.is_visible_in_tree() and title._utilities.is_visible_in_tree(), "interrupted entry restores the complete title")
 	SaveManager.clear_run()
 	SaveManager.enabled = false

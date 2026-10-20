@@ -42,7 +42,7 @@ func exercise() -> void:
 	check(stage.environment.sky.sky_material.get_shader_parameter("gilt_clouds")!=null,"gilt cloud ornament is bound to sky shading")
 	check(GameState.rng.state==random_before,"title rendering leaves gameplay random state untouched")
 	var names: Array = title._buttons.map(func(button):return button.text)
-	for caption: String in ["开始新冒险","字库图鉴","设置","离开","自定义构筑","字网图谱","旧版远征"]:
+	for caption: String in ["开始新冒险","字库图鉴","设置","离开","自定义构筑","字网图谱"]:
 		check(names.has(caption),"retains action "+caption)
 	var reports: Array = []
 	for resolution in [Vector2i(1280,720),Vector2i(1920,1080),Vector2i(960,432)]:

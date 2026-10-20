@@ -41,7 +41,7 @@ func _run() -> void:
 	title._finish_start()
 	await _frames(8)
 	_check(Router.current_path.ends_with("tutorial_screen.gd") and Router.current.params.get("start_adventure", false), "first new adventure opens the full guided practice")
-	Router.current._leave()
+	Router.current._lesson_overlay._exit_btn.pressed.emit()
 	await _frames(8)
 	_check(Router.current_path.ends_with("room_map_screen.gd") and Settings.first_run_tutorial_completed and not GameState.first_run_tutorial, "skip starts the adventure without repeating the inline tutorial")
 	Settings.first_run_tutorial_completed = false
@@ -98,7 +98,9 @@ func _run() -> void:
 	title._on_start(); title._entry_timer.stop(); title._finish_start()
 	await _frames(8)
 	screen = Router.current
-	for path in screen.PATHS: screen._commit(path)
+	for path in screen.PATHS:
+		if screen._lesson_overlay != null: screen._lesson_overlay._next_btn.pressed.emit()
+		screen._commit(path)
 	screen._end_turn()
 	_check(screen.step == screen.COMPLETE_STEP and Settings.first_run_tutorial_completed, "automatic tutorial can be completed through every real lesson action")
 	screen._leave()

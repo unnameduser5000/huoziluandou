@@ -150,9 +150,7 @@ func _run() -> void:
 	Router.goto("res://src/screens/title_screen.gd")
 	await _frames()
 	title = Router.current
-	title._on_expedition()
-	await _wait_for_map()
-	_ok(Router.current_path.contains("expedition_map_screen") and GameState.expedition != null and _started == 3, "墨途远征入口仍创建一次远征并打开原地图")
+	_ok(not title.has_method("_on_expedition"), "主界面已移除旧版远征入口")
 	Settings.reduced_motion = _saved_motion
 	Settings.changed.emit()
 	Settings.visual_style = _saved_style
