@@ -21,7 +21,7 @@ static func calculate(completed_progress: int, defeated_enemies: int, pressure_p
 		{"label": "末战击倒", "detail": "%d 名 × %d" % [kills, KILL_POINTS], "score": kills * KILL_POINTS},
 		{"label": "末战攻坚", "detail": "按敌方气血削减比例", "score": clampi(pressure_points, 0, 150)},
 		{"label": "收集遗物", "detail": "%d 件 × %d" % [relics, RELIC_POINTS], "score": relics * RELIC_POINTS},
-		{"label": "余金", "detail": "%d 枚 × %d · 上限 %d" % [gold, GOLD_POINTS, GOLD_CAP], "score": mini(GOLD_CAP, gold * GOLD_POINTS)},
+		{"label": "剩余铜钱", "detail": "%d 枚 × %d · 上限 %d" % [gold, GOLD_POINTS, GOLD_CAP], "score": mini(GOLD_CAP, gold * GOLD_POINTS)},
 	]
 	var total := 0
 	for row in rows:

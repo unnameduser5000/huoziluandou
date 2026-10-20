@@ -631,10 +631,10 @@ func deal_damage(target: Combatant, amount: int, is_attack: bool = true) -> int:
 	if is_attack and achievement != null: achievement.attack_hit(target, before_hp, before_shield, _attack_sequence_depth > 0)
 	if not target.is_player:
 		damage_dealt_this_turn += real
-		# 爆金：敌方每受到一次「攻击」获得 1 铜钱（被格挡/护甲吸收也算，故不看 real）
+		# 爆金：敌方受攻击时按配置获得铜钱，记录实际入账（护盾全挡也算）。
 		if is_attack and target.status_stacks("gold_burst") > 0:
-			earn_gold(BattleBalance.i("bounty_on_hit", 1))
-			_log("爆金：%s 受击，获得 1 铜钱" % target.display_name)
+			var earned := earn_gold(BattleBalance.i("bounty_on_hit", 1))
+			_log("爆金：%s 受击，获得 %d 铜钱" % [target.display_name, earned])
 		Relics.on_enemy_wounded(self, target)
 		_check_bounty()
 	return real

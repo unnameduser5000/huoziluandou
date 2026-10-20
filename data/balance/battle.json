@@ -2816,13 +2816,13 @@
       [
         "words/w072/e/0/amount",
         "利息",
-        "金币伤害比例",
+        "铜钱伤害比例",
         10,
         10,
         0,
         100,
         "%",
-        "处理器 gold_percent_damage；对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。",
+        "处理器 gold_percent_damage；对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。",
         "res://resources/words/w072.tres"
       ],
       [
@@ -2834,7 +2834,7 @@
         0,
         0,
         "百分点",
-        "处理器 gold_percent_damage；对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。",
+        "处理器 gold_percent_damage；对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。",
         "res://resources/words/w072.tres"
       ],
       [

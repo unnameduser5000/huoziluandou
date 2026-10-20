@@ -288,7 +288,7 @@ func _end_battle() -> void:
 	if b.is_victory():
 		GameState.add_captured(b.captured_chars)
 		GameState.settle_victory_economy()
-		_log("胜利：HP %d/%d，金 %d" % [GameState.player_hp, GameState.player_max_hp, GameState.gold])
+		_log("胜利：HP %d/%d，铜钱 %d" % [GameState.player_hp, GameState.player_max_hp, GameState.gold])
 		if node != null and node.type == MapNodeData.Type.BOSS and GameState.act_index >= 3:
 			reward_options.clear()
 			_complete_node()
@@ -306,7 +306,7 @@ func _end_battle() -> void:
 func _apply_reward(t: String, action: Dictionary) -> Dictionary:
 	if t == "skip":
 		GameState.add_gold(8)
-		_log("跳过奖励：+8 金")
+		_log("跳过奖励：+8 铜钱")
 	else:
 		var i := int(action.get("index", -1))
 		if i < 0 or i >= reward_options.size():

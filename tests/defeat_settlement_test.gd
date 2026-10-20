@@ -56,6 +56,8 @@ func _ready() -> void:
 		await wait_result()
 		var screen: Control = Router.current
 		check(screen.result.turn == 8 and screen.result.gold == 42 and screen.result.deck_count == before[0] and screen.result.relics.size() == 1, mode + " settlement displays final run data")
+		var summary: EffectText = screen.find_child("RunSummary", true, false)
+		check(summary.get_parsed_text().contains("铜钱：42") and not screen.result.has("score"), mode + " current settlement records copper without the legacy score conversion")
 		check(GameState.player_hp == 0 and before == [GameState.deck_size(), GameState.gold, GameState.battle_sequence, GameState.rng.state], mode + " defeat does not restart, heal or award rewards")
 		check(ended == ended_before + 1 and Music.current == "defeat", mode + " settles once and plays defeat music")
 		if run != null: check(run.phase == "defeat", "courtyard remains terminal")

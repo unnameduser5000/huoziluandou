@@ -50,7 +50,7 @@ func _ready() -> void:
 func set_offer(caption: String, price: int, enabled: bool) -> void:
 	_enabled = enabled
 	title_label.text = caption
-	price_label.text = "%d 铜钱" % price
+	price_label.text = "%d钱" % price
 	_face.material_override = stage.pigment("teal" if enabled else "stone")
 	title_label.modulate = Color("ecdcbb") if enabled else Color("82938b")
 	price_label.modulate = Color("d6ba7d") if enabled else Color("82938b")

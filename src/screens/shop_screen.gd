@@ -146,7 +146,7 @@ func _refresh() -> void:
 		else: _showcase.stage.add_object(glyph, int(item.display_slot), ch.rarity if ch != null else 0, ch == null)
 		var card := GlyphOffer.new()
 		card.character = ch
-		card.caption = "%d 金" % item.price
+		card.caption = "%d钱" % item.price
 		card.clicked.connect(_on_offer_clicked.bind(i))
 		card.hovered.connect(_inspect.bind(i))
 		content.add_child(card)
@@ -159,7 +159,7 @@ func _refresh() -> void:
 			card._caption.offset_bottom = 20 * scale
 		elif item.kind == "relic":
 			var tier: int = Relics.TIER[item.relic]
-			card._caption.text = "%s\n%d金 · %s" % [Relics.name_of(item.relic), item.price, {1: "常见", 2: "少见", 3: "稀有"}[tier]]
+			card._caption.text = "%s\n%d钱 · %s" % [Relics.name_of(item.relic), item.price, {1: "常见", 2: "少见", 3: "稀有"}[tier]]
 		_cards.append(card)
 	_selected = clampi(_selected, 0, maxi(0, _offers.size() - 1))
 	_layout_offers.call_deferred()

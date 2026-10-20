@@ -2415,7 +2415,7 @@ func _layout_illustrated_desktop(layout: Dictionary) -> void:
 		hp_font -= 1
 	_player_hp_value.add_theme_font_size_override("font_size", hp_font)
 	_player_status.position = layout.status.position - _player_panel.position
-	# 从右向左预算菜单、金币、回合，剩余区域才用于 Buff。
+	# 从右向左预算菜单、铜钱、回合，剩余区域才用于 Buff。
 	var status_end := minf(layout.status.end.x, _topbar.position.x + _turn_label.position.x - 12 * unit)
 	_player_status.size = Vector2(maxf(0, status_end - layout.status.position.x), layout.status.size.y)
 	var pad := Vector2(42, 24) * unit

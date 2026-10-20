@@ -98,6 +98,34 @@ func _ready() -> void:
 	var glutton := Database.get_enemy("glutton")
 	check(glutton.description.contains("每吞1字获得%d格挡" % int(glutton.tuning.swallow_block)), "吞字护盾参数不被同名行动字段覆盖")
 	check(BattleText.clean("获得金币#123，临挡与超强翻倍") == "获得铜钱，临时格挡与超强增幅", "旧战斗提示仍会清理残留术语与内部编号")
+	check(BattleText.clean("成词：金币；组词：爆金币；使用【金币】，获得2金币。") == "组词：金币；组词：爆金币；使用【金币】，获得2铜钱。", "货币旧称被清理时，实际组词名称保持不变")
+	var coin_word := Database.get_word_by_glyphs_string("金币")
+	var burst_word := Database.get_word_by_glyphs_string("爆金币")
+	check(coin_word.word == "金币" and coin_word.describe().contains("铜钱") and burst_word.word == "爆金币" and burst_word.describe().contains("铜钱"), "金币和爆金币保留词名，效果明确获得铜钱")
+	var word_text := EffectText.new()
+	add_child(word_text)
+	word_text.set_effect_text("使用【金币】和【爆金币】，获得金币。")
+	check(word_text.text.contains("url=word:金币") and word_text.text.contains("url=word:爆金币") and word_text.get_parsed_text().ends_with("获得铜钱。"), "保留词名后，字词详情链接仍能正确打开")
+	word_text.queue_free()
+	var coin_help: String = EffectGlossary.entry("term:gold").text
+	check(coin_help.contains("本局内") and coin_help.contains("开始新冒险时重置") and not coin_help.contains("分"), "铜钱说明符合当前冒险结算，不再承诺旧版换分规则")
+	var bounty_before: Variant = BattleBalance.values["core/bounty_on_hit"]
+	BattleBalance.values["core/bounty_on_hit"] = 2
+	check(BattleText.word(burst_word).contains("获得2铜钱"), "爆金币文案跟随真实收益配置")
+	var rules: BattleRules = Database.rules.duplicate()
+	rules.gold_cap_per_battle = 3
+	var combat := BattleState.new(rules)
+	combat.player = Combatant.new("玩家", 30, true)
+	var target := Combatant.new("练习对手", 30, false)
+	combat.enemies.append(target)
+	target.add_status("gold_burst", 1)
+	var wallet_before := GameState.gold
+	combat.deal_damage(target, 1, true)
+	check(GameState.gold == wallet_before + 2 and combat.log.back().contains("获得 2 铜钱"), "爆金日志与实际铜钱入账相同")
+	combat.deal_damage(target, 1, true)
+	check(GameState.gold == wallet_before + 3 and combat.log.back().contains("获得 1 铜钱"), "收益受限时，爆金日志显示实际入账")
+	BattleBalance.values["core/bounty_on_hit"] = bounty_before
+	GameState.gold = wallet_before
 	var bubble := SpeechBubble.new()
 	add_child(bubble)
 	bubble.set_result(null, ["击"], ["获得1金币", "回复1生命", "热度+1", "补1字", "获得1格挡"])

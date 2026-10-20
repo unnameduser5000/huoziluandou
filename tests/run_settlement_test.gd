@@ -1,6 +1,8 @@
 extends Control
+## Current result screen: immutable snapshots, retired saves and accessible layouts.
 const SLOT := "user://settlement_regression.save"
-const FOLDER := "res://docs/qa/defeat-settlement-2026-10-18"
+const RESULT := "res://src/screens/run_result_screen.gd"
+const FOLDER := "user://run-result-regression"
 var passed := 0
 var failed := 0
 var ended := 0
@@ -8,6 +10,8 @@ var ended := 0
 
 func _ready() -> void:
 	Settings.storage_path = "user://run_settlement_test-settings.cfg"
+	GameState.set_meta("courtyard_preview", true)
+	Achievements.autosave = false
 	get_tree().create_timer(45).timeout.connect(func(): get_tree().quit(2))
 	_run.call_deferred()
 
@@ -21,40 +25,65 @@ func frames(n := 6) -> void:
 	for i in n: await get_tree().process_frame
 
 
+func wait_result() -> bool:
+	var deadline := Time.get_ticks_msec() + 5000
+	while Router.current_path != RESULT and Time.get_ticks_msec() < deadline:
+		await get_tree().create_timer(0.02).timeout
+	await frames()
+	var arrived := Router.current_path == RESULT
+	check(arrived, "real defeat routes to the current unified result screen")
+	return arrived
+
+
 func _run() -> void:
 	Settings.reduced_motion = true
+	get_window().size = Vector2i(1280, 720)
 	SaveManager.activate(SLOT)
 	SaveManager.clear_run()
 	Router.host = self
-	var result := RunSettlement.calculate(3, 2, 75, 1, 20, 1)
-	check(result.total == 1075 and result.rows.size() == 6, "six categories sum to 1075")
-	check(RunSettlement.calculate(-4, -2, -1, -2, 999, -1).total == 300, "negative values contribute zero and gold is capped")
-	check(RunSettlement.calculate(0, 0, 999, 0, 0).total == 150, "pressure score is bounded")
 	EventBus.run_ended.connect(func(victory):
 		if not victory: ended += 1)
 	GameState.start_new_run()
 	GameState.visited = {"1:1": true, "1:2": true}
 	GameState.gold = 12
-	GameState.relics = ["test"]
+	GameState.add_relic("strike")
+	Router.goto("res://src/screens/map_screen.gd")
+	await frames()
+	check(SaveManager.checkpoint(), "active classic adventure can be checkpointed")
+	SaveManager.flush()
+	check(FileAccess.file_exists(SLOT), "an actual adventure save exists before defeat")
 	Router.goto("res://src/screens/battle_screen.gd", {"seed": 7})
 	await frames()
-	var battle_screen = Router.current
+	var battle_screen: Control = Router.current
+	var deck_count := GameState.deck_size()
+	var sequence := GameState.battle_sequence
+	battle_screen.battle.turn = 8
 	battle_screen.battle.enemies[0].hp = 0
 	battle_screen.battle.player.hp = 0
 	battle_screen._check_battle_over()
 	battle_screen._check_battle_over()
-	await get_tree().create_timer(0.45).timeout
-	await frames()
-	check(Router.current_path.ends_with("/defeat_screen.gd"), "real battle defeat routes to settlement")
+	if not await wait_result(): finish(); return
 	check(ended == 1, "repeated battle completion emits one loss event")
-	check(not SaveManager.has_save() and not FileAccess.file_exists(SLOT), "failure clears adventure save")
-	var screen = Router.current
-	check(screen._total == 360, "snapshot preserves progress, kill, pressure, relic and gold")
-	check(screen._score_label.text == "360" and not screen._revealing, "reduced motion immediately shows final score")
-	check(screen._row_lines.size() == 6 and screen._buttons.get_child_count() == 3, "all score lines and actions are mounted")
-	screen._restart_button.pressed.emit()
+	check(not SaveManager.has_save() and not FileAccess.file_exists(SLOT), "failure clears the adventure save")
+	check(not SaveManager.resume_run(), "a finished adventure cannot be resumed")
+	var screen: Control = Router.current
+	var snapshot: Dictionary = screen.result.duplicate(true)
+	check(not snapshot.victory and snapshot.mode == "经典冒险" and snapshot.turn == 8, "snapshot records the actual mode, outcome and final turn")
+	check(snapshot.gold == 12 and snapshot.deck_count == deck_count and snapshot.relics.size() == 1, "snapshot preserves copper, deck and relics without score conversion")
+	check(not snapshot.has("total") and not snapshot.has("rows"), "current results do not require the removed score table")
+	var summary: EffectText = screen.find_child("RunSummary", true, false)
+	check(summary.get_parsed_text().contains("铜钱：12") and screen._return_button.text == "返回主菜单", "current summary and return action are shown")
+	# Reopening must use the captured result rather than sampling mutable game state.
+	GameState.gold = 99
+	Router.goto(RESULT)
 	await frames()
-	check(Router.current_path.ends_with("/map_screen.gd") and GameState.player_hp > 0 and GameState.visited.is_empty(), "classic restart resets the run")
+	check(Router.current.result == snapshot and GameState.last_run_result == snapshot and ended == 1, "reopening preserves the immutable snapshot without settling again")
+	GameState.gold = 12
+	Router.current._return_button.pressed.emit()
+	await frames()
+	check(Router.current_path.ends_with("/title_screen.gd"), "return action opens the main menu")
+	check(GameState.player_hp == 0 and GameState.gold == 12 and GameState.deck_size() == deck_count and GameState.battle_sequence == sequence, "returning does not restart, heal or change the finished adventure")
+	check(GameState.last_run_result == snapshot and not SaveManager.has_save(), "returning retains the result without reviving its save")
 	var ex := Expedition.start(77)
 	ex.taken = {12: true, 14: true}
 	ex.amb_done = {0: true}
@@ -62,75 +91,45 @@ func _run() -> void:
 	ex.push_panel({"kind": "act_end"})
 	ex.next_act()
 	check(ex.act == 2 and GameState.visited.size() == 3, "expedition archives unique completed locations across acts")
-	ex.taken[20] = true
-	ex.fight = {"kind": "boss", "name": "测试首领"}
-	var node := MapNodeData.new()
-	node.type = MapNodeData.Type.BOSS
-	node.title = "测试首领"
-	var bs := BattleState.new(Database.rules)
-	bs.start(GameState.make_battle_deck(), [Database.get_enemy("ink_spirit")], 7)
-	bs.enemies[0].hp = bs.enemies[0].max_hp / 2
-	var snapshot := RunSettlement.from_run(bs, node, ex)
-	check(snapshot.rows[0].score == 400 and snapshot.rows[1].score == 500, "expedition retains previous act progress and boss milestone")
-	check(snapshot.rows[3].score == 75, "half-damaged boss earns half of the 150 pressure points")
-	ex.steps += 100
-	check(RunSettlement.from_run(bs, node, ex).total == snapshot.total, "walking back and forth cannot increase settlement score")
-	ex.finish_battle(false)
-	check(ex.fight.is_empty() and snapshot.rows[3].score == 75, "snapshot survives clearing expedition encounter")
-	bs.enemies[0].hp = bs.enemies[0].max_hp
-	check(RunSettlement.from_run(bs, node, ex).rows[3].score == 0, "entering boss combat alone awards no pressure score")
-	var fork := MapNodeData.new()
-	fork.type = MapNodeData.Type.FORK
-	bs.enemies[0].hp = bs.enemies[0].max_hp / 2
-	check(RunSettlement.from_run(bs, fork, null, true).rows[3].score == 37, "elite fork receives elite pressure weight")
 	var packed := SaveCodec.new().pack({"visited": GameState.visited})
-	check(SaveCodec.new().unpack(packed).visited == GameState.visited, "archived expedition locations remain save compatible")
-	Router.goto("res://src/screens/defeat_screen.gd", {"settlement": snapshot, "expedition": true})
+	check(SaveCodec.new().unpack(packed).visited == GameState.visited, "archived expedition progress remains save compatible")
+	GameState.gold = 19
+	Router.goto("res://src/screens/expedition_map_screen.gd")
 	await frames()
-	Router.current._restart_button.pressed.emit()
-	await frames()
-	check(Router.current_path.ends_with("/expedition_map_screen.gd") and GameState.expedition != ex and not GameState.expedition.over, "expedition restart enters a fresh expedition")
-	var live_ex := GameState.expedition
-	live_ex.fight = {"kind": "boss", "k": live_ex.boss, "name": "结算测试首领", "g": live_ex.m.TH.boss, "caught": false, "debuff": ""}
-	Router.goto("res://src/screens/battle_screen.gd", {"node": live_ex.battle_node(), "expedition": true, "seed": 7})
+	check(SaveManager.checkpoint(), "active expedition can be checkpointed")
+	SaveManager.flush()
+	var cell: int = ex.m.encounter_stages.keys()[0]
+	ex.fight = {"kind": "foe", "k": cell, "name": "结算测试敌人"}
+	Router.goto("res://src/screens/battle_screen.gd", {"node": ex.battle_node(), "expedition": true, "seed": 7})
 	await frames()
 	battle_screen = Router.current
+	battle_screen.battle.turn = 4
 	battle_screen.battle.player.hp = 0
 	battle_screen.battle.enemies[0].hp = 0
 	battle_screen._check_battle_over()
-	await get_tree().create_timer(0.45).timeout
-	await frames()
-	check(Router.current_path.ends_with("/defeat_screen.gd") and live_ex.over and live_ex.fight.is_empty(), "real expedition defeat clears encounter and enters settlement")
-	check(Router.current._rows[3].score == 150 and Router.current._expedition and not SaveManager.has_save(), "expedition snapshot survives finish_battle and retires save")
+	if not await wait_result(): finish(); return
+	check(ex.over and not ex.won and ex.fight.is_empty(), "real expedition defeat retires its encounter")
+	screen = Router.current
+	snapshot = screen.result.duplicate(true)
+	check(snapshot.mode == "墨途远征" and snapshot.act == 2 and snapshot.turn == 4 and snapshot.gold == 19, "expedition result preserves its final act, turn and copper")
+	check(ended == 2 and not SaveManager.has_save() and not FileAccess.file_exists(SLOT), "expedition settles once and retires its save")
 	for profile in [[Vector2i(960,432),160], [Vector2i(1280,720),0], [Vector2i(1280,720),320], [Vector2i(1920,1080),0], [Vector2i(2400,1080),440], [Vector2i(2532,1170),460], [Vector2i(3440,1440),0]]:
 		await _profile(profile[0], profile[1], snapshot)
 	BattleTouchLayout.test_dpi = 0
+	# The current screen has no score reveal or skip-animation controls.
 	Settings.reduced_motion = false
-	Router.goto("res://src/screens/defeat_screen.gd", {"settlement": result})
+	Router.goto(RESULT)
 	await frames()
-	screen = Router.current
-	check(screen._revealing, "normal motion begins an animated reveal")
-	var samples: Array = []
-	for i in 24:
-		await get_tree().create_timer(0.10).timeout
-		samples.append(int(screen._score_label.text))
-	var monotonic := true
-	for i in range(1, samples.size()): monotonic = monotonic and samples[i] >= samples[i - 1]
-	check(monotonic and int(screen._score_label.text) == result.total and not screen._revealing, "score rises monotonically to the exact final total")
-	Router.goto("res://src/screens/defeat_screen.gd", {"settlement": result})
+	check(Router.current.result == snapshot and not Router.current._return_button.disabled, "normal motion also shows the captured result with an available return action")
+	Router.current._return_button.pressed.emit()
 	await frames()
-	screen = Router.current
-	screen._skip_button.pressed.emit()
-	await get_tree().create_timer(0.25).timeout
-	check(not screen._revealing and screen._score_label.text == str(result.total), "skip kills animation and fixes final score")
-	check(screen._reveal_tween == null or not screen._reveal_tween.is_running(), "no tween continues after skip")
-	screen._skip_button.pressed.emit()
-	check(is_instance_valid(screen._rules_overlay), "completed animation offers readable scoring rules")
-	screen._rules_overlay._on_choose(0)
-	await frames()
-	screen._title_button.pressed.emit()
-	await frames()
-	check(Router.current_path.ends_with("/title_screen.gd"), "return title action navigates correctly")
+	check(Router.current_path.ends_with("/title_screen.gd") and GameState.expedition == null and GameState.room_run == null, "confirming results releases the finished run and returns to menu")
+	check(GameState.player_hp == 0 and GameState.last_run_result == snapshot and ended == 2, "confirmation preserves the outcome without starting or settling another run")
+	finish()
+
+
+func finish() -> void:
+	BattleTouchLayout.test_dpi = 0
 	SaveManager.clear_run()
 	SaveManager.enabled = false
 	print("[run_settlement_test] PASS=%d FAIL=%d" % [passed, failed])
@@ -141,18 +140,20 @@ func _profile(dimensions: Vector2i, dpi: float, snapshot: Dictionary) -> void:
 	get_window().size = dimensions
 	BattleTouchLayout.test_dpi = dpi
 	await frames()
-	Router.goto("res://src/screens/defeat_screen.gd", {"settlement": snapshot})
+	Router.goto(RESULT)
 	await frames(12)
-	var screen = Router.current
+	var screen: Control = Router.current
 	var tag := "%dx%d-%ddpi" % [dimensions.x, dimensions.y, dpi]
-	print("LAYOUT ", tag, " screen=", screen.size, " page=", screen._page.get_global_rect(), " minimum=", screen._page.get_combined_minimum_size(), " body=", screen._body.get_combined_minimum_size(), " scroll=", screen._rows_scroll.get_combined_minimum_size())
-	check(screen.get_global_rect().encloses(screen._page.get_global_rect()), tag + " settlement frame fits viewport")
-	var rect: Rect2 = screen._page.get_global_rect()
-	check(rect.encloses(screen._buttons.get_global_rect()), tag + " actions remain inside frame")
-	for button in screen._buttons.get_children():
-		check(rect.encloses(button.get_global_rect()) and button.size.y >= 48 * JourneyStyle.touch_scale(screen) - 1, tag + " action is visible and at least 48dp")
-	check(not screen._rows_scroll.get_h_scroll_bar().visible, tag + " score details do not overflow horizontally")
-	check(not screen._rows_scroll.get_v_scroll_bar().visible, tag + " six score lines fit without vertical scrolling")
+	check(screen.result == snapshot and ended == 2, tag + " rebuilding layout cannot change or repeat settlement")
+	check(screen.content.get_global_rect().encloses(screen._return_button.get_global_rect()), tag + " return action remains inside the content area")
+	var physical_scale := float(dimensions.y) / screen.get_viewport_rect().size.y
+	var target_height := 48 * maxf(1, dpi / 160.0)
+	check(screen._return_button.size.y * physical_scale >= target_height - 1, tag + " return action retains its physical touch height")
+	var scrolls: Array = screen.content.find_children("*", "ScrollContainer", true, false)
+	check(scrolls.size() == 1, tag + " result details remain in one scrollable area")
+	if scrolls.size() == 1:
+		var scroll: ScrollContainer = scrolls[0]
+		check(screen.content.get_global_rect().encloses(scroll.get_global_rect()) and not scroll.get_h_scroll_bar().visible, tag + " details stay within the viewport without horizontal overflow")
 	if OS.get_cmdline_user_args().has("--capture"):
 		RenderingServer.force_draw(false)
 		DirAccess.make_dir_recursive_absolute(FOLDER)

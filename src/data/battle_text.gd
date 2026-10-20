@@ -116,7 +116,7 @@ const WORDS := {
 	"热能": "将全部热度转为等量储能。",
 	"爆冷": "造成{a0}+上回合失去生命×{p0_per}伤害，并清空热度。",
 	"爆破": "摧毁选中2×2区域内的字，包括本词；每摧毁1字，造成{a0}伤害。",
-	"爆金币": "使目标获得爆金，再造成{p1_hits}段伤害，每段{a1}。",
+	"爆金币": "使目标获得爆金：每受一次攻击，你获得{c_bounty_on_hit}铜钱，护盾全挡也算；再造成{p1_hits}段伤害，每段{a1}。",
 	"电击": "造成{a0}+当前储能×{p0_per}伤害。",
 	"电力": "本场：打出【左击】【右击】后，自动花{c_copy_layer_cost}储能，把那行再移 1 格。",
 	"电流": "本回合补过字时获得{a0}储能，否则补{a0}字。",
@@ -329,8 +329,15 @@ static func character(data: CharacterData) -> String:
 	return str(CHARACTERS[data.id]).format(params)
 
 static func clean(text: String) -> String:
+	# Keep actual word names in references; migrate only legacy currency wording.
+	var currency := RegEx.new()
+	currency.compile("爆金币|[【「《]金币[】」》]|(?:成词|组词|词语|word)[：:]\\s*金币|金币")
+	var matches := currency.search_all(text)
+	for index in range(matches.size() - 1, -1, -1):
+		var found: RegExMatch = matches[index]
+		if found.get_string() == "金币":
+			text = text.substr(0, found.get_start()) + "铜钱" + text.substr(found.get_end())
 	var replacements := {
-		"金币": "铜钱",
 		"本词以外": "本词之外",
 		"临挡": "临时格挡",
 		"超强翻倍": "超强增幅",

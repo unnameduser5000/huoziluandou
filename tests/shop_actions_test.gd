@@ -126,7 +126,7 @@ func _run() -> void:
 	shop._refresh_stock()
 	check(GameState.gold == 195 - cost and shop._offers.filter(func(o): return o.kind not in ["buy_char", "relic"]) == services, "first refresh spends five and preserves services")
 	check(shop._offers.filter(func(o): return o.kind == "relic").size() == 3 and not shop._offers.any(func(o): return o.kind == "relic" and o.relic == id), "refresh restores three stock items without owned relics")
-	check(shop.refresh_cost() == 10 and shop._hud.tertiary_button.model.price_label.text == "10 金币", "compact dial updates next fee to ten")
+	check(shop.refresh_cost() == 10 and shop._hud.tertiary_button.model.price_label.text == "10钱" and shop._hud.tertiary_button._caption.text == "换货\n10钱", "refresh model and visible label agree on the ten-copper fee")
 	check(SaveManager.checkpoint(), "refresh count checkpoint accepted")
 	SaveManager.flush()
 	check(SaveManager.resume_run(), "refresh count checkpoint resumes")

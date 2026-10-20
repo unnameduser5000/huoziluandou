@@ -331,7 +331,7 @@ func _action_text(action: Dictionary) -> String:
 	match action.type:
 		"shop_buy":
 			var name: String = {"buy_char":"活字【%s】" % action.glyph,"remove":"删去一枚字","copy":"拓印一枚字","heal":"回复30%气血"}.get(action.kind,action.kind)
-			return "%s　%d金" % [name,action.price]
+			return "%s　%d钱" % [name,action.price]
 		"shop_leave": return "离开字肆"
 		"rest": return {"heal":"回复%d气血" % int(action.get("amount",0)),"remove":"删去一枚字","upgrade":"为一枚字镀金"}[action.kind]
 		"event": return action.text

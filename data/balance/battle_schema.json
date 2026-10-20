@@ -2972,13 +2972,13 @@
         [
           "words/w072/e/0/amount",
           "利息",
-          "金币伤害比例",
+          "铜钱伤害比例",
           10,
           10,
           0,
           100,
           "%",
-          "处理器 gold_percent_damage；对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。",
+          "处理器 gold_percent_damage；对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。",
           "res://resources/words/w072.tres"
         ],
         [
@@ -2990,7 +2990,7 @@
           0,
           0,
           "百分点",
-          "处理器 gold_percent_damage；对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。",
+          "处理器 gold_percent_damage；对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。",
           "res://resources/words/w072.tres"
         ],
         [
@@ -13172,7 +13172,7 @@
       "min": 0,
       "max": 100,
       "integer": true,
-      "label": "金币伤害比例",
+      "label": "铜钱伤害比例",
       "name": "利息",
       "group": "词组数值",
       "resource": "res://resources/words/w072.tres",
@@ -19424,7 +19424,7 @@
     },
     {
       "category": "words",
-      "description": "对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。",
+      "description": "对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。",
       "effects": [
         {
           "amount": 10,
@@ -19432,7 +19432,7 @@
           "args": {},
           "handler": "gold_percent_damage",
           "hits": 1,
-          "note": "对目标造成当前总金币的10%基础伤害，向下取整。不消耗金币。"
+          "note": "对目标造成当前总铜钱的10%基础伤害，向下取整。不消耗铜钱。"
         }
       ],
       "fields": {},
@@ -20498,7 +20498,7 @@
       "label": "炼：净化杂字获得铜钱",
       "min": 0,
       "max": 999,
-      "unit": "金币",
+      "unit": "铜钱",
       "group": "战斗机制",
       "handlers": [
         "refine_junk_neighbor"
@@ -20651,7 +20651,7 @@
       "label": "爆金：每次命中获得铜钱",
       "min": 0,
       "max": 999,
-      "unit": "金币",
+      "unit": "铜钱",
       "group": "战斗机制",
       "handlers": [
         "bounty_on_hit"
@@ -20666,7 +20666,7 @@
       "label": "镀金：每枚实体每次出字铜钱",
       "min": 0,
       "max": 999,
-      "unit": "金币",
+      "unit": "铜钱",
       "group": "战斗机制",
       "handlers": [
         "gild_glyph"
@@ -20911,7 +20911,7 @@
       "label": "加收：每枚敌方注字铜钱",
       "min": 0,
       "max": 999,
-      "unit": "金币",
+      "unit": "铜钱",
       "group": "战斗机制",
       "handlers": [
         "inject_bounty"

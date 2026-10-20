@@ -37,5 +37,5 @@ func set_offer(caption: String, price: int, enabled: bool) -> void:
 	text = caption + (" · %d铜钱" % price if price >= 0 else "")
 	disabled = not enabled
 	model.set_offer(caption, price, enabled)
-	_caption.text = "%s\n%d金" % [caption, price]
+	_caption.text = "%s\n%d钱" % [caption, price]
 	_caption.modulate = Color.WHITE if enabled else Color("82938b")
