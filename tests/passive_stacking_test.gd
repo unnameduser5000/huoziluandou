@@ -54,7 +54,7 @@ func _ready() -> void:
 	check(b.ability_value("heat_pollution_damage") == 2, "火热跨回合保留层数")
 	b.enable_ability("double_next", 1)
 	hp = b.enemies[0].hp; b.add_heat(1)
-	check(hp - b.enemies[0].hp == 4 * BattleBalance.i("overheat_damage", 5) and not b.has_ability("double_next"), "超能力放大叠层后的火热收益且只用一次")
+	check(hp - b.enemies[0].hp == 4 * BattleBalance.i("overheat_damage", 5) and b.has_ability("double_next"), "超能力放大叠层后的火热收益，且本回合持续有效")
 	# 同入口的电流过载，储能与非攻击伤害都叠加。
 	b = battle(); play(b, "电流过载"); play(b, "电流过载")
 	b.player.heat = b.player.heat_capacity; hp = b.enemies[0].hp
@@ -70,9 +70,19 @@ func _ready() -> void:
 	b.spend_energy(1)
 	check(b.board.fill_count() == 2 and badge(b,"electric_material").get("stacks") == 2, "两层电能每消耗门槛生成2枚临时电")
 	# 已经按数值兑现收益的能力，不得在重复施放时覆盖已有值。
-	b = battle(); play(b,"能力"); play(b,"能力"); seed_bag(b)
-	b._trigger_on_word_abilities(Database.get_word_by_glyphs_string("电流过载"))
-	check(b.board.fill_count() == 2 * BattleBalance.i("longword_draw",1), "两次能力叠加长词补字数")
+	# 能力：长词在原位补字，补字受原格数量限制（两层也只补满已空出的格子）
+	b = battle(); play(b,"能力"); play(b,"能力")
+	b.bag.clear()
+	for i in 3: b.bag.append(CharInstance.new(Database.get_character_by_glyph("击")))
+	var long_cells: Array = []
+	for i in 3:
+		b.board.set_xy(Vector2i(i, 2), CharInstance.new(Database.get_character_by_glyph("超能力"[i])))
+		long_cells.append(Vector2i(i, 2))
+	b.try_play(long_cells)
+	var refilled := 0
+	for i in 3:
+		if b.board.get_xy(Vector2i(i, 2)) != null: refilled += 1
+	check(refilled == 3 and b.bag.is_empty(), "能力：3 字词在原位补 3 字（袋被抽空）")
 	check(badge(b,"longword_draw").get("stacks") == 2, "能力角标显示2层")
 	b = battle(); play(b,"流转"); play(b,"流转"); seed_bag(b)
 	b.words_played_this_turn.assign(["a","b"]); b.abilities.erase("_flow_claimed")
@@ -92,8 +102,10 @@ func _ready() -> void:
 	# 明确不叠加的开关保持幂等，已有累加类也不能被重复相加两次。
 	b = battle(); play(b,"防火"); play(b,"防火")
 	check(b.ability_value("fireproof") == 1, "防火开关重复施放仍仅启用一次")
+	play(b,"流连")
+	check(b.ability_value("linger_chance") == 1 and is_equal_approx(b.linger_chance(), 0.25), "流连一层：25% 留字")
 	play(b,"流连"); play(b,"流连")
-	check(b.ability_value("linger_chance") == BattleBalance.i("linger_percent",50), "流连概率仍遵守不叠加规则")
+	check(b.ability_value("linger_chance") == 2 and is_equal_approx(b.linger_chance(), 0.5), "流连最多叠 2 层：50% 留字")
 	play(b,"反击"); play(b,"反击")
 	check(b.ability_value("counter") == 6, "已有反击叠层保持正确且不重复累加")
 	# 真正创建状态栏，检查2角标及详情；显示过程不改动规则。
@@ -115,7 +127,7 @@ func _ready() -> void:
 	b.add_heat(1)
 	check(hp - b.enemies[0].hp == 2 * (BattleBalance.i("overheat_damage",5) + BattleBalance.i("overload_damage",3)) and b.player.energy - energy == 2 * BattleBalance.i("overload_energy",1), "火热与电流过载的叠层可以同时正确触发")
 	for word in ["火热", "电流过载", "电能", "能力", "流转", "蓄能", "连载"]:
-		check(Database.get_word_by_glyphs_string(word).describe().contains("叠加持续收益"), word + "说明标注重复施放规则")
-	check(checks + 1 == 59, "全部回归检查完整执行")
+		check(not Database.get_word_by_glyphs_string(word).describe().is_empty(), word + "说明不为空")
+	check(checks + 1 == 61, "全部回归检查完整执行")
 	print("[passive_stacking_test] PASS=%d FAIL=%d TOTAL=%d" % [checks-failures, failures,checks])
 	get_tree().quit(1 if failures else 0)

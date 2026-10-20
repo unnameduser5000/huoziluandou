@@ -366,8 +366,9 @@ static func destroy_2x2(b: BattleState, top_left: Vector2i) -> int:
 		if inst.is_player_owned() and not inst.temporary:
 			if b.has_ability("blastproof"):
 				b.bag.append(inst)
-				b.player.add_persistent_block(BattleBalance.i("blastproof_block", 1))
-				b._log("防爆：救回【%s】回字袋，持久盾 +1" % inst.glyph())
+				var shield_gain := BattleBalance.i("blastproof_block", 1) * b.passive_multiplier("防爆")
+				b.player.add_persistent_block(shield_gain)
+				b._log("防爆：救回【%s】回字袋，持久盾 +%d" % [inst.glyph(), shield_gain])
 			else:
 				b.discard.append(inst)
 		else:

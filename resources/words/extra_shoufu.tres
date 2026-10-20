@@ -7,18 +7,18 @@
 script = ExtResource("1_le2ug")
 kind = 29
 handler = "recover_two"
-note = "从弃字堆选至多2枚己方原实体，分别放入两个相邻空格。"
+note = "从弃字堆选至多2枚己方原字，分别放入两个相邻空格。"
 
 [resource]
 script = ExtResource("2_g6wyq")
 id = "extra_shoufu"
 word = "收复"
 glyphs = Array[String](["收", "复"])
-description = "从弃字堆选至多2枚己方原实体，分别放入两个相邻空格。"
+description = "从弃字堆选至多2枚己方原字，分别放入两个相邻空格。"
 effects = Array[ExtResource("1_le2ug")]([SubResource("Resource_qnd43")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "从弃字堆选至多2枚己方原实体，分别放入两个相邻空格。"
+effect_summary = "从弃字堆选至多2枚己方原字，分别放入两个相邻空格。"
 effect_handler_id = "recover_two"
 priority = "流转"
 implemented = true

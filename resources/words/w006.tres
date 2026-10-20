@@ -9,18 +9,18 @@ kind = 29
 handler = "counter"
 amount = 3
 timing = "delayed"
-note = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；已有反击层数可叠加，每层+3伤害。"
+note = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；每层 +3 伤害。"
 
 [resource]
 script = ExtResource("2_i52oq")
 id = "w006"
 word = "反击"
 glyphs = Array[String](["反", "击"])
-description = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；已有反击层数可叠加，每层+3伤害。"
+description = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；每层 +3 伤害。"
 effects = Array[ExtResource("1_6ephk")]([SubResource("Resource_vx737")])
 group = "防反"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；已有反击层数可叠加，每层+3伤害。"
+effect_summary = "获得3层反击。本回合所有敌人行动后，以剩余临时格挡+9对首个存活敌人反击一次；每层 +3 伤害。"
 effect_handler_id = "counter"
 timing = "delayed"
 p25_implemented = true

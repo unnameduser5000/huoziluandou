@@ -9,14 +9,14 @@ kind = 29
 handler = "precision_draw"
 amount = 0
 target = 13
-note = "从字袋揭示 2 枚实体字，选择 1 枚补入原格，另一枚留在字袋；只有 1 枚时直接补入，空袋时只弃字"
+note = "从字袋揭示 2 枚字块，选择 1 枚补入原格，另一枚留在字袋；只有 1 枚时直接补入，空袋时只弃字"
 
 [resource]
 script = ExtResource("1_jfdmv")
 id = "jing"
 glyph = "精"
 pinyin = "jing"
-description = "从字袋揭示 2 枚实体字，选择 1 枚补入原格，另一枚留在字袋；只有 1 枚时直接补入，空袋时只弃字"
+description = "从字袋揭示 2 枚字块，选择 1 枚补入原格，另一枚留在字袋；只有 1 枚时直接补入，空袋时只弃字"
 tags = Array[String](["alchemy"])
 rarity = 3
 solo_effects = Array[ExtResource("2_phd60")]([SubResource("Effect")])

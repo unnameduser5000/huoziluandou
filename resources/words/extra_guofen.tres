@@ -7,18 +7,18 @@
 script = ExtResource("1_rlu0i")
 handler = "overdo"
 amount = 6
-note = "本场第N次结算【过分】效果，造成一次基础6×N伤害；效果重演也推进次数。"
+note = "本场每打一次【过分】，伤害都更高：第 N 次为 6×N（6、12、18…）。"
 
 [resource]
 script = ExtResource("2_rcrkm")
 id = "extra_guofen"
 word = "过分"
 glyphs = Array[String](["过", "分"])
-description = "本场第N次结算【过分】效果，造成一次基础6×N伤害；效果重演也推进次数。"
+description = "本场每打一次【过分】，伤害都更高：第 N 次为 6×N（6、12、18…）。"
 effects = Array[ExtResource("1_rlu0i")]([SubResource("Resource_cxww6")])
 group = "连携"
 design_stage = "设计负责人新增"
-effect_summary = "本场第N次结算【过分】效果，造成一次基础6×N伤害；效果重演也推进次数。"
+effect_summary = "本场每打一次【过分】，伤害都更高：第 N 次为 6×N（6、12、18…）。"
 effect_handler_id = "overdo"
 priority = "连携"
 implemented = true

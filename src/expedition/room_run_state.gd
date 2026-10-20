@@ -26,7 +26,7 @@ var last_event_id := ""
 var position := Vector2i.ZERO
 var autosave := false
 var generation_error := ""
-var layout_kind := "procedural"
+var layout_kind := "node_graph"   ## 只有节点图在接线；garden/旧 procedural 已停用
 var generation_ms := 0.0
 var travel: RefCounted
 var planned_route: Array[String] = [] # Preview only; confirmation still advances one encounter.
@@ -45,7 +45,7 @@ static func start(seed_value := -1):
 
 func reset(cfg: Dictionary = {}) -> void:
 	super.reset(cfg)
-	layout_kind = str(cfg.get("layout","procedural"))
+	layout_kind = str(cfg.get("layout","node_graph"))
 	GameState.room_run = self
 	GameState.expedition = null
 	resolved.clear(); visited_rooms.clear(); choices.clear(); sealed.clear(); contents.clear()
@@ -57,25 +57,18 @@ func _load_act(number: int) -> void:
 	var began := Time.get_ticks_usec()
 	GameState.act_index = number
 	GameState.node_index = 1
-	layout = preload("res://src/expedition/node_route_layout.gd").new() if layout_kind=="node_graph" else LAYOUT.new()
 	travel = null
 	generation_error = ""
 	var fitted := false
-	if layout_kind=="node_graph":
+	if layout_kind == "node_graph":
+		layout = preload("res://src/expedition/node_route_layout.gd").new()
 		graph = preload("res://src/expedition/node_route_plan.gd").generate(seed,number)
 		fitted = layout.build(graph)
-	elif layout_kind=="compact_garden":
-		graph = preload("res://src/expedition/garden_compact_run_plan.gd").generate(seed,number)
-		fitted = layout.build(graph)
-	elif layout_kind=="random_garden":
-		var generator = preload("res://src/expedition/random_garden_plan.gd")
-		for attempt in 8:
-			graph = generator.generate(seed,number,attempt)
-			if layout.build(graph) and generator.validate_navigation(layout): fitted = true; break
-		if not fitted: layout.error = "庭院门路没有连通："+layout.error
 	else:
-		graph = preload("res://src/expedition/authored_garden_plan.gd").graph(seed,number) if layout_kind=="authored_garden" else GRAPH.generate(seed,number)
-		fitted = layout.build(graph)
+		# garden / 旧 procedural 路线已停用：不再生成，只提示（旧存档会走这里）
+		layout = preload("res://src/expedition/node_route_layout.gd").new()
+		graph = {}
+		layout.error = "这条路线已停用（%s），请开始新冒险" % layout_kind
 	if not fitted: generation_error = layout.error; phase = "generation_error"; return
 	current_room = graph.start
 	resolved = {current_room:true}; visited_rooms = {current_room:true}
@@ -133,9 +126,12 @@ func _apply_event(action: Dictionary) -> Dictionary:
 	var option: Dictionary = options[index]
 	var result: Dictionary = EventEffects.resolve(option.get("effects", []), GameState.rng, true)
 	if not result.get("ok", false): return _fail(str(result.get("reason", "事件结算失败")))
+	for note in (result.get("notes", []) as Array):
+		if not event_notes.has(str(note)): event_notes.append(str(note))
 	pending_event_effect = result.get("pending", {})
 	pending_event_relics = result.get("relic_offers", [])
 	pending_event_next = str(option.get("goto", ""))
+	_remember_event_note(option)
 	pending_spawn = str(option.get("spawn", ""))
 	pending_spawn_relic = str(option.get("spawn_relic", ""))
 	if pending_event_effect.is_empty():

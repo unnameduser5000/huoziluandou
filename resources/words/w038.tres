@@ -9,18 +9,18 @@ kind = 29
 handler = "ability_compound_next"
 amount = 1
 timing = "next_word"
-note = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时副本；原实体正常消耗，副本用后移除。"
+note = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时字；原字正常消耗，副本用后移除。"
 
 [resource]
 script = ExtResource("2_g2vlh")
 id = "w038"
 word = "复合"
 glyphs = Array[String](["复", "合"])
-description = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时副本；原实体正常消耗，副本用后移除。"
+description = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时字；原字正常消耗，副本用后移除。"
 effects = Array[ExtResource("1_ongao")]([SubResource("Resource_k7a1n")])
 group = "流转"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时副本；原实体正常消耗，副本用后移除。"
+effect_summary = "本回合下一次三字及以上词，选择1枚实际消耗的字，在原格留下临时字；原字正常消耗，副本用后移除。"
 effect_handler_id = "ability_compound_next"
 timing = "next_word"
 p25_implemented = true

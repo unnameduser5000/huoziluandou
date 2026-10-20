@@ -54,8 +54,6 @@ static func collect(unit: Combatant, battle: BattleState = null) -> Array:
 			var description := EffectGlossary.status_description(str(id))
 			if id == "vulnerable":
 				description = EffectGlossary.vulnerable_damage_text()
-			elif id == "burn":
-				description = "该敌人接下来%d次行动后，各受到%d点灼烧伤害。" % [stacks, int(unit.status_data.get("burn_damage", BattleBalance.i("burn_default_damage", 3)))]
 			elif id == "heart_corrosion":
 				description = "该敌人每次行动后受到%d点非攻击伤害，可被护盾吸收；层数不衰减。" % (stacks * BattleBalance.i("corrosion_per_stack", 1))
 			if data.decay_per_turn > 0 and (id == "vulnerable" or (unit.is_player and id in ["poison", "regen"])):
@@ -79,7 +77,7 @@ static func collect(unit: Combatant, battle: BattleState = null) -> Array:
 		if unit.turn_strength > 0:
 			result.append(entry("turn_strength", "强", "强", unit.turn_strength, "本回合攻击每段伤害+%d，下回合开始清除。" % unit.turn_strength, Palette.GOLD))
 		if unit.turn_damage_halve:
-			result.append(entry("guard_halve", "放心", "心", 1, "本回合先用护盾吸收，剩余要扣生命的伤害除以%s并向上取整，再减%d，最低0。" % [BattleBalance.f("guard_divisor", 2.0), BattleBalance.i("guard_flat", 1)], Palette.BLOCK))
+			result.append(entry("guard_halve", "放心", "心", 1, "本回合先用护盾吸收，剩余要扣生命的伤害除以%s，再减%d，最低0。" % [BattleBalance.f("guard_divisor", 2.0), BattleBalance.i("guard_flat", 1)], Palette.BLOCK))
 		if unit.turn_damage_double:
 			result.append(entry("turn_damage_double", "冷心", "冷", 1, "本回合攻击的基础伤害、力量与热力加成乘%d。" % BattleBalance.i("cold_attack_mult", 2), Palette.GOLD))
 		if unit.no_block_turns > 0:

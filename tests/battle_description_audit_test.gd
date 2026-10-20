@@ -126,11 +126,11 @@ func run() -> void:
 	BattleBalance.values["core/strength_per_stack"] = 3
 	BattleBalance.values["core/regen_per_stack"] = 2
 	BattleBalance.values["core/corrosion_per_stack"] = 5
-	BattleBalance.values["core/burn_actions"] = 4
+	BattleBalance.values["core/burn_heat_mult"] = 3
 	BattleBalance.values["core/double_attack_mult"] = 3
 	check(EffectGlossary.entry("term:gilded").text.contains("4铜钱") and EffectGlossary.entry("term:gilded").text.contains("临时复制不继承"), "镀金更新数值时保留实体和继承规则")
 	check(EffectGlossary.entry("term:strength").text.contains("+3") and EffectGlossary.entry("term:regen").text.contains("×2") and EffectGlossary.entry("term:corrosion").text.contains("×5"), "力量、再生和心蚀词条同步当前倍率")
-	check(EffectGlossary.entry("term:burn").text.contains("持续4次") and EffectGlossary.entry("term:double_attack").text.contains("×3"), "持续次数与超强倍率也从配置读取")
+	check(EffectGlossary.entry("term:burn").text.contains("×3") and EffectGlossary.entry("term:double_attack").text.contains("×3"), "灼烧倍率与超强倍率都从配置读取")
 	var strength := Database.get_status("strength")
 	var old_decay := strength.decay_per_turn
 	strength.decay_per_turn = 2

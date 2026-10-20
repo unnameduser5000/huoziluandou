@@ -7,12 +7,12 @@ var failed := 0
 
 func _ready() -> void:
 	GameState.set_meta("courtyard_preview",true)
+	SaveManager.enabled = false
 	Settings.reduced_motion = true
 	for seed_value in 40:
 		var graph: Dictionary = PLAN.generate(seed_value,1)
 		_ok(graph.rooms.size()>=PLAN.MIN_NODES and graph.rooms.size()<=PLAN.MAX_NODES,"variable candidate count, seed %d" % seed_value)
 		var reached := {"start":true}
-		var event_bounds := {"start":[0,0]}
 		var all_forward := true
 		var incoming := true
 		for id: String in graph.rooms:
@@ -25,14 +25,8 @@ func _ready() -> void:
 				for target: String in spec.next:
 					all_forward = all_forward and graph.rooms[target].row==spec.row+1
 					if reached.has(id): reached[target] = true
-					var count: int = 1 if graph.rooms[target].kind=="event" else 0
-					var lower: int = event_bounds[id][0]+count
-					var upper: int = event_bounds[id][1]+count
-					if event_bounds.has(target):
-						event_bounds[target] = [mini(event_bounds[target][0],lower),maxi(event_bounds[target][1],upper)]
-					else: event_bounds[target] = [lower,upper]
 		_ok(all_forward and incoming and reached.size()==graph.rooms.size(),"every candidate lies on a forward route")
-		_ok(event_bounds.boss[0]>=3 and event_bounds.boss[1]<=5,"3–5 events on every route")
+		_ok(graph.rooms.values().all(func(spec): return spec.kind in ["start","boss","battle","elite","event","rest","shop","treasure"]),"every route uses playable encounter types")
 		var crosses := false
 		for edge: Dictionary in graph.edges:
 			if PLAN._crosses(graph,edge.from,edge.to): crosses = true

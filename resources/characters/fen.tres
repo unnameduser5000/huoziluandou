@@ -9,14 +9,14 @@ kind = 29
 handler = "split_neighbor"
 amount = 0
 target = 5
-note = "选择原格四邻的一枚己方字，在本字原格生成其主字形的临时复制；仅供组词，单独打出只弃掉，不复制附加属性"
+note = "选择原格四邻的一枚己方字，在本字原格生成其主字形的临时字；仅供组词，单独打出只弃掉，不复制附加属性"
 
 [resource]
 script = ExtResource("1_yxnhr")
 id = "fen"
 glyph = "分"
 pinyin = "fen"
-description = "选择原格四邻的一枚己方字，在本字原格生成其主字形的临时复制；仅供组词，单独打出只弃掉，不复制附加属性"
+description = "选择原格四邻的一枚己方字，在本字原格生成其主字形的临时字；仅供组词，单独打出只弃掉，不复制附加属性"
 tags = Array[String](["flow"])
 rarity = 2
 solo_effects = Array[ExtResource("2_y0ly5")]([SubResource("Effect")])

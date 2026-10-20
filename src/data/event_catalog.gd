@@ -15,7 +15,7 @@ const EVENTS := [
 		"acts": [1, 2],
 		"tags": ["resource", "risk", "character"],
 		"options": [
-			{"text": "探手取字（失去 8 生命，获得一枚字）", "primary": true, "effects": [
+			{"text": "探手取字（失去 8 气血，获得一枚字）", "primary": true, "effects": [
 				{"type": "damage", "amount": 8},
 				{"type": "gain_character", "min_rarity": 0, "max_rarity": 2},
 			]},
@@ -34,7 +34,7 @@ const EVENTS := [
 			{"text": "拓下残字（获得一枚稀有字）", "primary": true, "effects": [
 				{"type": "gain_character", "min_rarity": 2, "max_rarity": 4},
 			]},
-			{"text": "敲下碑角（获得 25 铜钱，失去 5 生命）", "effects": [
+			{"text": "敲下碑角（失去 5 气血，获得 25 铜钱）", "effects": [
 				{"type": "gold", "amount": 25},
 				{"type": "damage", "amount": 5},
 			]},
@@ -85,7 +85,7 @@ const EVENTS := [
 		"tags": ["heal", "curse", "gold"],
 		"options": [
 			{"text": "俯身听声（回复 15 气血）", "effects": [{"type": "heal", "amount": 15}]},
-			{"text": "吊起井中物（获得 26 铜钱，获得一枚【债】字）", "primary": true, "effects": [
+			{"text": "吊起井中物（获得 26 铜钱和一枚【债】字）", "primary": true, "effects": [
 				{"type": "gold", "amount": 26},
 				{"type": "gain_pollution", "character": "debt", "count": 1},
 			]},
@@ -360,7 +360,7 @@ const EVENTS := [
 		"acts": [3],
 		"tags": ["curse", "character", "gold"],
 		"options": [
-			{"text": "开门迎客（获得一枚稀有字，获得一枚【忘】字）", "primary": true, "effects": [
+			{"text": "开门迎客（获得一枚稀有字和一枚【忘】字）", "primary": true, "effects": [
 				{"type": "gain_character", "min_rarity": 2, "max_rarity": 4},
 				{"type": "gain_pollution", "character": "oblivion", "count": 1},
 			]},
@@ -379,7 +379,7 @@ const EVENTS := [
 		"acts": [2, 3],
 		"tags": ["curse", "gold", "heal"],
 		"options": [
-			{"text": "取走供钱（获得 24 铜钱，获得一枚【契】字）", "primary": true, "effects": [
+			{"text": "取走供钱（获得 24 铜钱和一枚【契】字）", "primary": true, "effects": [
 				{"type": "gold", "amount": 24},
 				{"type": "gain_pollution", "character": "contract", "count": 1},
 			]},
@@ -398,40 +398,40 @@ const EVENTS := [
 		"tags": ["relic", "gold", "risk"],
 		"weight": 0.8,
 		"options": [
-			{"text": "投 8 铜钱试椟（玉声近一寸）", "primary": true, "requires": {"type": "gold_at_least", "amount": 8}, "effects": [{"type": "spend_gold", "amount": 8}], "goto": "one"},
-			{"text": "投 25 铜钱，请出椟中玉（50% 得遗物）", "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "two"},
+			{"text": "试椟（支付 8 铜钱）", "append": "玉声近了。", "primary": true, "requires": {"type": "gold_at_least", "amount": 8}, "effects": [{"type": "spend_gold", "amount": 8}], "goto": "one"},
+			{"text": "请出椟中玉（支付 25 铜钱，50% 得遗物）", "append": "玉声近了。", "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "two"},
 			{"text": "韫椟而藏（回复 8 气血）", "effects": [{"type": "heal", "amount": 8}]},
 		],
 		"nodes": {
 			"start": {
 				"body": "“有美玉于斯，韫椟而藏诸？求善贾而沽诸？”\n旧库梁上悬着一只木椟，椟里传出玉声，像有人在里面轻轻叩门。",
 				"options": [
-					{"text": "投 8 铜钱试椟（玉声近一寸）", "primary": true, "requires": {"type": "gold_at_least", "amount": 8}, "effects": [{"type": "spend_gold", "amount": 8}], "goto": "one"},
-					{"text": "投 25 铜钱，请出椟中玉（50% 得遗物）", "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "two"},
+					{"text": "试椟（支付 8 铜钱）", "append": "玉声近了。", "primary": true, "requires": {"type": "gold_at_least", "amount": 8}, "effects": [{"type": "spend_gold", "amount": 8}], "goto": "one"},
+					{"text": "请出椟中玉（支付 25 铜钱，50% 得遗物）", "append": "玉声近了。", "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "two"},
 					{"text": "韫椟而藏（回复 8 气血）", "effects": [{"type": "heal", "amount": 8}]},
 				],
 			},
 			"one": {
 				"body": "玉声已经抵住椟盖，椟缝里漏出一线温光。\n再投一次，玉声会更近；现在开椟，只有四分之一的机会。",
 				"options": [
-					{"text": "再投 15 铜钱（升到 50% 得遗物）", "primary": true, "requires": {"type": "gold_at_least", "amount": 15}, "effects": [{"type": "spend_gold", "amount": 15}], "goto": "two"},
-					{"text": "开椟（25% 得随机普通遗物；失败得 10 铜钱）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.25, "fallback_gold": 10}]},
+					{"text": "再投（支付 15 铜钱，成功率升到 50%）", "append": "玉声近了。", "primary": true, "requires": {"type": "gold_at_least", "amount": 15}, "effects": [{"type": "spend_gold", "amount": 15}], "goto": "two"},
+					{"text": "开椟（25% 得随机普通遗物）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.25, "fallback_gold": 10}]},
 					{"text": "收手（获得 5 铜钱）", "effects": [{"type": "gold", "amount": 5}]},
 				],
 			},
 			"two": {
 				"body": "椟盖已经发热，玉声不再叩门，改为在椟中缓慢地转。\n再投一次，玉声会更近；现在开椟，机会一半。",
 				"options": [
-					{"text": "再投 18 铜钱（升到 75% 得遗物）", "primary": true, "requires": {"type": "gold_at_least", "amount": 18}, "effects": [{"type": "spend_gold", "amount": 18}], "goto": "three"},
-					{"text": "开椟（50% 得随机普通遗物；失败得 15 铜钱）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.5, "fallback_gold": 15}]},
+					{"text": "再投（支付 18 铜钱，成功率升到 75%）", "append": "玉声近了。", "primary": true, "requires": {"type": "gold_at_least", "amount": 18}, "effects": [{"type": "spend_gold", "amount": 18}], "goto": "three"},
+					{"text": "开椟（50% 得随机普通遗物）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.5, "fallback_gold": 15}]},
 					{"text": "收手（获得 8 铜钱）", "effects": [{"type": "gold", "amount": 8}]},
 				],
 			},
 			"three": {
 				"body": "锁扣自己弹开一线，玉光从缝里照到你脸上。\n再投一次，椟中玉就会自己出来；现在开椟，机会已有四分之三。",
 				"options": [
-					{"text": "再投 25 铜钱（100% 得遗物）", "primary": true, "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "four"},
-					{"text": "开椟（75% 得随机普通遗物；失败得 20 铜钱）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.75, "fallback_gold": 20}]},
+					{"text": "再投（支付 25 铜钱，成功率升到 100%）", "append": "玉声近了。", "primary": true, "requires": {"type": "gold_at_least", "amount": 25}, "effects": [{"type": "spend_gold", "amount": 25}], "goto": "four"},
+					{"text": "开椟（75% 得随机普通遗物）", "effects": [{"type": "gain_relic", "relic": "random", "chance": 0.75, "fallback_gold": 20}]},
 					{"text": "收手（获得 12 铜钱）", "effects": [{"type": "gold", "amount": 12}]},
 				],
 			},
@@ -479,7 +479,7 @@ const EVENTS := [
 					{"type": "gain_pollution", "character": "debt", "count": 1},
 				], "else": [{"type": "gold", "amount": 30}]},
 			]},
-			{"text": "碎璧（获得 28 铜钱，失去 5 气血）", "effects": [
+			{"text": "碎璧（失去 5 气血，获得 28 铜钱）", "effects": [
 				{"type": "damage", "amount": 5},
 				{"type": "gold", "amount": 28},
 			]},
@@ -496,7 +496,7 @@ const EVENTS := [
 		"tags": ["relic", "curse", "gold"],
 		"weight": 0.7,
 		"options": [
-			{"text": "攫金（获得随机普通遗物，最大气血 -3）", "primary": true, "effects": [
+			{"text": "攫金（最大气血 -3，获得随机普通遗物）", "primary": true, "effects": [
 				{"type": "if", "condition": {"type": "has_normal_relic_choice"}, "then": [
 					{"type": "max_hp", "amount": -3},
 					{"type": "gain_relic", "relic": "random"},
@@ -538,7 +538,7 @@ const EVENTS := [
 			{"text": "裁去一字（删掉字袋中一枚字）", "primary": true, "effects": [
 				{"type": "remove_character", "count": 1},
 			]},
-			{"text": "裁去两字，换一枚稀有字（删 2 枚字，失去 5 气血，获得一枚稀有字）", "effects": [
+			{"text": "裁去两字（删 2 枚字，失去 5 气血，获得一枚稀有字）", "effects": [
 				{"type": "remove_character", "count": 2},
 				{"type": "damage", "amount": 5},
 				{"type": "gain_character", "min_rarity": 2, "max_rarity": 4},
@@ -597,11 +597,11 @@ const EVENTS := [
 		"tags": ["purify", "pollution", "heal"],
 		"weight": 0.8,
 		"options": [
-			{"text": "浣一枚污染字（清除 1 枚污染字，失去 4 气血）", "primary": true, "requires": {"type": "pollution_count_at_least", "amount": 1}, "effects": [
+			{"text": "浣污染字（失去 4 气血，清除 1 枚污染字）", "primary": true, "requires": {"type": "pollution_count_at_least", "amount": 1}, "effects": [
 				{"type": "damage", "amount": 4},
 				{"type": "remove_pollution", "count": 1},
 			]},
-			{"text": "浣两枚污染字（清除 2 枚污染字，失去 8 气血）", "requires": {"type": "pollution_count_at_least", "amount": 2}, "effects": [
+			{"text": "浣污染字（失去 8 气血，清除 2 枚污染字）", "requires": {"type": "pollution_count_at_least", "amount": 2}, "effects": [
 				{"type": "damage", "amount": 8},
 				{"type": "remove_pollution", "count": 2},
 			]},
@@ -618,7 +618,7 @@ const EVENTS := [
 		"tags": ["purify", "pollution", "max_hp", "risk"],
 		"weight": 0.4,
 		"options": [
-			{"text": "涤除全部污染字（清除全部污染字，最大气血 -3）", "primary": true, "requires": {"type": "pollution_count_at_least", "amount": 2}, "effects": [
+			{"text": "涤除污染字（最大气血 -3，清除全部污染字）", "primary": true, "requires": {"type": "pollution_count_at_least", "amount": 2}, "effects": [
 				{"type": "remove_pollution", "count": 99},
 				{"type": "max_hp", "amount": -3},
 			]},

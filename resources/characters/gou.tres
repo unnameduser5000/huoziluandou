@@ -9,14 +9,14 @@ kind = 29
 handler = "buy_bag_solo"
 amount = 2
 target = 13
-note = "支付 2 铜钱，从字袋选择 1 枚己方实体字补入原格，保留原属性；空袋时只弃字，不支付"
+note = "支付 2 铜钱，从字袋选择 1 枚己方原字字补入原格，保留原属性；空袋时只弃字，不支付"
 
 [resource]
 script = ExtResource("1_80s7a")
 id = "gou"
 glyph = "购"
 pinyin = "gou"
-description = "支付 2 铜钱，从字袋选择 1 枚己方实体字补入原格，保留原属性；空袋时只弃字，不支付"
+description = "支付 2 铜钱，从字袋选择 1 枚己方原字字补入原格，保留原属性；空袋时只弃字，不支付"
 tags = Array[String](["economy"])
 rarity = 2
 solo_effects = Array[ExtResource("2_c4moo")]([SubResource("Effect")])

@@ -27,7 +27,7 @@ static func open_deck(owner: Control) -> void:
 		var character: CharacterData = Database.get_character_by_glyph(glyph)
 		if character != null: characters.append(character)
 	var overlay := CollectionOverlay.new()
-	overlay.setup({"title": "字袋", "subtitle": "共 %d 枚 · 仅查看，不消耗铜钱或整备机会" % GameState.deck_size(), "characters": characters, "counts": counts})
+	overlay.setup({"title": "字袋", "subtitle": "共 %d 枚 · 仅查看" % GameState.deck_size(), "characters": characters, "counts": counts})
 	owner.add_child(overlay)
 
 

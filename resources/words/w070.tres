@@ -9,18 +9,18 @@ kind = 29
 handler = "capture_glyph"
 amount = 4
 target = 9
-note = "支付 4 铜钱，净化并永久收编一枚敌方实体字"
+note = "支付 4 铜钱，净化并永久收编一枚敌方字块"
 
 [resource]
 script = ExtResource("2_v3xqm")
 id = "w070"
 word = "收购"
 glyphs = Array[String](["收", "购"])
-description = "支付 4 铜钱，净化并永久收编一枚敌方实体字"
+description = "支付 4 铜钱，净化并永久收编一枚敌方字块"
 effects = Array[ExtResource("1_vl3cc")]([SubResource("Resource_x3v6t")])
 group = "经济"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "支付 4 铜钱，净化并永久收编一枚敌方实体字"
+effect_summary = "支付 4 铜钱，净化并永久收编一枚敌方字块"
 effect_handler_id = "capture_glyph"
 requires_target = 9
 p25_implemented = true

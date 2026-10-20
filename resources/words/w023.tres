@@ -10,7 +10,7 @@ handler = "strength_growing"
 amount = 1
 target = 3
 timing = "immediate"
-note = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场；效果重演不增加出词次数"
+note = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_04spt")
 id = "w023"
 word = "加强"
 glyphs = Array[String](["加", "强"])
-description = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场；效果重演不增加出词次数"
+description = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场"
 effects = Array[ExtResource("1_sobpq")]([SubResource("Resource_efi0h")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场；效果重演不增加出词次数"
+effect_summary = "本场第 N 次成功打出加强，获得 N 层力量（依次 +1、+2、+3……），力量持续本场"
 effect_handler_id = "strength_growing"
 p25_implemented = true
 implementation_delta = "已按 2026-10-14 确认方案更新"

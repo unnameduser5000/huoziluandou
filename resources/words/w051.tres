@@ -10,7 +10,7 @@ handler = "apply_status_self"
 amount = 1
 target = 3
 status_id = "next_extra"
-note = "下一次多字词的即时效果额外执行一次，费用再付；跨回合保留。"
+note = "下一个组词的效果再结算一次。"
 
 [sub_resource type="Resource" id="Resource_glaj4"]
 script = ExtResource("1_w5u1i")
@@ -24,11 +24,11 @@ script = ExtResource("2_lqgjd")
 id = "w051"
 word = "超载"
 glyphs = Array[String](["超", "载"])
-description = "热度+3；下一次多字词的即时效果额外执行一次，不重复消耗材料，费用再付。跨回合保留。"
+description = "热度 +3；下一个组词（2 字及以上）的效果再结算一次。"
 effects = Array[ExtResource("1_w5u1i")]([SubResource("Resource_8s538"), SubResource("Resource_glaj4")])
 group = "热暴"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "热度+3；下一次多字词的即时效果额外执行一次，不重复消耗材料，费用再付。跨回合保留。"
+effect_summary = "热度 +3；下一个组词（2 字及以上）的效果再结算一次。"
 effect_handler_id = "apply_status_self"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P1·重点机制"

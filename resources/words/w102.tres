@@ -9,7 +9,7 @@ kind = 29
 handler = "gild_glyph"
 amount = 0
 args = {"cost": 0}
-note = "为字袋中一枚未镀金的实体字永久镀金，并立即获得3铜钱；不产生战后收益。"
+note = "为字袋中一枚未镀金的字块永久镀金，并立即获得3铜钱；不产生战后收益。"
 
 [sub_resource type="Resource" id="Economy_1"]
 script = ExtResource("1_lis86")
@@ -17,18 +17,18 @@ kind = 29
 handler = "gold"
 amount = 3
 args = {}
-note = "为字袋中一枚未镀金的实体字永久镀金，并立即获得3铜钱；不产生战后收益。"
+note = "为字袋中一枚未镀金的字块永久镀金，并立即获得3铜钱；不产生战后收益。"
 
 [resource]
 script = ExtResource("2_t3ol5")
 id = "w102"
 word = "复利投资"
 glyphs = Array[String](["复", "利", "投", "资"])
-description = "为字袋中一枚未镀金的实体字永久镀金，并立即获得3铜钱；不产生战后收益。"
+description = "为字袋中一枚未镀金的字块永久镀金，并立即获得3铜钱；不产生战后收益。"
 effects = Array[ExtResource("1_lis86")]([SubResource("Economy_0"), SubResource("Economy_1")])
 group = "经济"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "为字袋中一枚未镀金的实体字永久镀金，并立即获得3铜钱；不产生战后收益。"
+effect_summary = "为字袋中一枚未镀金的字块永久镀金，并立即获得3铜钱；不产生战后收益。"
 effect_handler_id = "gild_glyph"
 timing = "immediate"
 p25_implemented = true

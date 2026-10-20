@@ -7,18 +7,18 @@
 script = ExtResource("1_kkh5b")
 kind = 29
 handler = "guard_halve"
-note = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半并向上取整，再减1，最低0。"
+note = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半，再减1，最低0。"
 
 [resource]
 script = ExtResource("2_vodjn")
 id = "extra_fangxin"
 word = "放心"
 glyphs = Array[String](["放", "心"])
-description = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半并向上取整，再减1，最低0。"
+description = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半，再减1，最低0。"
 effects = Array[ExtResource("1_kkh5b")]([SubResource("Resource_2q1jf")])
 group = "防反"
 design_stage = "设计负责人新增"
-effect_summary = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半并向上取整，再减1，最低0。"
+effect_summary = "本回合先用护盾吸收伤害，剩余要扣生命的伤害减半，再减1，最低0。"
 effect_handler_id = "guard_halve"
 priority = "防反"
 implemented = true

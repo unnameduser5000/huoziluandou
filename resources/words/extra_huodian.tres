@@ -7,18 +7,18 @@
 script = ExtResource("1_2lwff")
 kind = 29
 handler = "heat_to_energy_damage"
-note = "清空全部热度，每2热度获得1储能，向下取整，并造成一次5点基础伤害。"
+note = "清空全部热度，每2热度获得1储能，并造成一次5点基础伤害。"
 
 [resource]
 script = ExtResource("2_fcwcd")
 id = "extra_huodian"
 word = "火电"
 glyphs = Array[String](["火", "电"])
-description = "清空全部热度，每2热度获得1储能，向下取整，并造成一次5点基础伤害。"
+description = "清空全部热度，每2热度获得1储能，并造成一次5点基础伤害。"
 effects = Array[ExtResource("1_2lwff")]([SubResource("Resource_hpehb")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "清空全部热度，每2热度获得1储能，向下取整，并造成一次5点基础伤害。"
+effect_summary = "清空全部热度，每2热度获得1储能，并造成一次5点基础伤害。"
 effect_handler_id = "heat_to_energy_damage"
 priority = "蓄放"
 implemented = true

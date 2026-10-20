@@ -10,18 +10,18 @@ handler = "energy_regen"
 amount = 3
 target = 0
 timing = "persistent"
-note = "持续三回合，每回合获得 2 点储能（含施放回合；重施刷新，同回合不重复发放）"
+note = "本场 3 回合内，每回合获得 2 储能（打出当回合也算）。再打一次会重新计 3 回合，同一回合不会重复发。"
 
 [resource]
 script = ExtResource("2_word")
 id = "extra_huineng"
 word = "回能"
 glyphs = Array[String](["回", "能"])
-description = "持续三回合，每回合获得 2 点储能（含施放回合；重施刷新，同回合不重复发放）"
+description = "本场 3 回合内，每回合获得 2 储能（打出当回合也算）。再打一次会重新计 3 回合，同一回合不会重复发。"
 effects = Array[ExtResource("1_effect")]([SubResource("Effect")])
 group = "蓄放"
 design_stage = "2026-10-14 重设计"
-effect_summary = "持续三回合，每回合获得 2 点储能（含施放回合；重施刷新，同回合不重复发放）"
+effect_summary = "本场 3 回合内，每回合获得 2 储能（打出当回合也算）。再打一次会重新计 3 回合，同一回合不会重复发。"
 effect_handler_id = "energy_regen"
 timing = "persistent"
 priority = "蓄放"

@@ -16,8 +16,38 @@ func readable(text: String, limit: int) -> bool:
 		if text.contains(term): return false
 	return true
 
+
+## 递归扫描 src/，确保已废弃的 WordDescriptions.TEXT 没有被重新引用。
+func _scan_dir(dir_path: String, needle: String, hits: Array) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var name := dir.get_next()
+	while name != "":
+		if name.begins_with("."):
+			name = dir.get_next()
+			continue
+		var full := dir_path.path_join(name)
+		if dir.current_is_dir():
+			_scan_dir(full, needle, hits)
+		elif name.ends_with(".gd"):
+			var text := FileAccess.get_file_as_string(full)
+			if text.contains(needle):
+				hits.append(full)
+		name = dir.get_next()
+	dir.list_dir_end()
+
 func _ready() -> void:
 	check(BattleText.WORDS.size() == Database.words.size(), "全部词语都有玩家文案")
+	var desynced: Array = []
+	for word in Database.words.values():
+		if word.describe() != BattleText.word(word):
+			desynced.append(word.word)
+	check(desynced.is_empty(), "全部词的运行时说明都来自 BattleText.WORDS：%s" % [desynced])
+	var legacy_hits: Array = []
+	_scan_dir("res://src", "WordDescriptions.TEXT", legacy_hits)
+	check(legacy_hits.is_empty(), "废弃的 WordDescriptions.TEXT 没有被任何 src 代码引用：%s" % [legacy_hits])
 	check(BattleText.CHARACTERS.size() == Database.characters.size(), "全部单字都有玩家文案")
 	GameState.start_new_run("v03")
 	for card in GameState.deck:
@@ -56,9 +86,8 @@ func _ready() -> void:
 	word.effects[0].args.heat = 6
 	check(BattleText.word(word).contains("11储能、6热度"), "参数相同默认值不互相误替换")
 	word = Database.get_word_by_glyphs_string("超载").duplicate(true) as WordData
-	word.effects[0].amount = 2
 	word.effects[1].amount = 9
-	check(BattleText.word(word).contains("热度+9，获得2层"), "层数和热度分别绑定")
+	check(BattleText.word(word).contains("热度+9") and BattleText.word(word).contains("效果再结算一次"), "热度数值独立绑定，效果说明与数值不串")
 	var fold := Combatant.new("折页蛾", 32, false)
 	fold.enemy_data = Database.get_enemy("fold_moth")
 	check(EnemyMechanics.marker_name(fold, "签") == "折页签" and EnemyMechanics.marker_description(fold, "签").contains("单纯移动无效"), "普通签按来源命名，写明移动不解签")
@@ -68,7 +97,7 @@ func _ready() -> void:
 	check(EnemyMechanics.marker_name(fold, "签") == "压轨签" and EnemyMechanics.marker_description(fold, "签").contains("移出原行"), "压轨签说明具体移动要求")
 	var glutton := Database.get_enemy("glutton")
 	check(glutton.description.contains("每吞1字获得%d格挡" % int(glutton.tuning.swallow_block)), "吞字护盾参数不被同名行动字段覆盖")
-	check(BattleText.clean("己方原实体#123，预算与待兑现") == "己方原字，次数与待生效", "旧战斗提示也清理程序术语与内部编号")
+	check(BattleText.clean("获得金币#123，临挡与超强翻倍") == "获得铜钱，临时格挡与超强增幅", "旧战斗提示仍会清理残留术语与内部编号")
 	var bubble := SpeechBubble.new()
 	add_child(bubble)
 	bubble.set_result(null, ["击"], ["获得1金币", "回复1生命", "热度+1", "补1字", "获得1格挡"])

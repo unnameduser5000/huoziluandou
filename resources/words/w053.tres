@@ -12,18 +12,18 @@ timing = "next_word"
 args = {
 "heat": 2
 }
-note = "本回合下一次多字词消耗材料后、结算词效前，补至多4字、热度+2；优先补【急速】自身腾出的原格，其余随机落盘。"
+note = "本回合下一个组词（2 字及以上）后，补最多 4 字、热度 +2；先补本词腾出的格子，其余随机落位。"
 
 [resource]
 script = ExtResource("2_r0lnf")
 id = "w053"
 word = "急速"
 glyphs = Array[String](["急", "速"])
-description = "本回合下一次多字词消耗材料后、结算词效前，补至多4字、热度+2；优先补【急速】自身腾出的原格，其余随机落盘。"
+description = "本回合下一个组词（2 字及以上）后，补最多 4 字、热度 +2；先补本词腾出的格子，其余随机落位。"
 effects = Array[ExtResource("1_52uec")]([SubResource("Resource_nv5vy")])
 group = "热暴"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本回合下一次多字词消耗材料后、结算词效前，补至多4字、热度+2；优先补【急速】自身腾出的原格，其余随机落盘。"
+effect_summary = "本回合下一个组词（2 字及以上）后，补最多 4 字、热度 +2；先补本词腾出的格子，其余随机落位。"
 effect_handler_id = "ability_rapid_next"
 timing = "next_word"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"

@@ -10,7 +10,7 @@ handler = "reveal_place"
 amount = 2
 target = 0
 timing = "immediate"
-note = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原实体，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
+note = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原字，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_jqlhy")
 id = "w075"
 word = "投放"
 glyphs = Array[String](["投", "放"])
-description = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原实体，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
+description = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原字，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
 effects = Array[ExtResource("1_vmu6e")]([SubResource("Resource_kcw1v")])
 group = "经济"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原实体，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
+effect_summary = "支付 2 铜钱，查看字袋顶部至多 3 枚己方原字，选一枚放入指定空格并获得 1 次额外使用，其他留袋；无候选不支付"
 effect_handler_id = "reveal_place"
 requires_target = 0
 p25_implemented = true

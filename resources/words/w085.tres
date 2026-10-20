@@ -7,18 +7,18 @@
 script = ExtResource("1_6hf2p")
 kind = 29
 handler = "recast_board"
-note = "盘面非固定己方原实体回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
+note = "盘面未固定己方原字回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
 
 [resource]
 script = ExtResource("2_o1adn")
 id = "w085"
 word = "重铸"
 glyphs = Array[String](["重", "铸"])
-description = "盘面非固定己方原实体回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
+description = "盘面未固定己方原字回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
 effects = Array[ExtResource("1_6hf2p")]([SubResource("Resource_5fy26")])
 group = "淬炼"
 design_stage = "P23初稿；未完成分组复审"
-effect_summary = "盘面非固定己方原实体回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
+effect_summary = "盘面未固定己方原字回袋，敌方字、临时字移除；再随机补入相同数量，固定字留在原格。"
 effect_handler_id = "recast_board"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P4·待复审"

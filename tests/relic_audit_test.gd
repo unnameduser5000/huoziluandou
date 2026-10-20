@@ -319,11 +319,11 @@ func _test_blitz() -> void:
 	var b := _battle(["blitz"])
 	var e: Combatant = b.enemies[0]
 	e.add_status("burn", 2)
-	e.status_data["burn_damage"] = 3
+	b.player.heat = 2
 	var hp := e.hp
 	b.end_player_turn()
 	_ok(b.player.hp == 60, "急就章：第一回合敌人不出手")
-	_ok(e.hp == hp - 3 and e.status_stacks("burn") == 1, "急就章：只跳过行动，灼烧照常结算（-%d）" % (hp - e.hp))
+	_ok(e.hp == hp - 4 and e.status_stacks("burn") == 1, "急就章：只跳过行动，灼烧照常结算（当前热度2×2 = -%d）" % (hp - e.hp))
 	b.end_player_turn()
 	_ok(b.player.hp == 55, "急就章：第二回合恢复行动")
 

@@ -9,18 +9,18 @@ kind = 29
 handler = "recover_recent"
 amount = 2
 target = 0
-note = "把本回合此前最近消耗的最多两枚己方实体字放回字袋顶（不包含本词）"
+note = "把本回合此前最近消耗的最多两枚己方原字字放回字袋顶（不包含本词）"
 
 [resource]
 script = ExtResource("2_word")
 id = "extra_chonghui"
 word = "重回"
 glyphs = Array[String](["重", "回"])
-description = "把本回合此前最近消耗的最多两枚己方实体字放回字袋顶（不包含本词）"
+description = "把本回合此前最近消耗的最多两枚己方原字字放回字袋顶（不包含本词）"
 effects = Array[ExtResource("1_effect")]([SubResource("Effect")])
 group = "流转"
 design_stage = "2026-10-13 按词义补全"
-effect_summary = "把本回合此前最近消耗的最多两枚己方实体字放回字袋顶（不包含本词）"
+effect_summary = "把本回合此前最近消耗的最多两枚己方原字字放回字袋顶（不包含本词）"
 effect_handler_id = "recover_recent"
 priority = "流转"
 implemented = true

@@ -8,14 +8,14 @@ script = ExtResource("2_wlrnf")
 kind = 29
 handler = "throw_neighbor"
 target = 5
-note = "支付 1 铜钱，将原格四邻的一枚非固定字移到指定空格"
+note = "支付 1 铜钱，将原格四邻的一枚未固定字移到指定空格"
 
 [resource]
 script = ExtResource("1_gkkmo")
 id = "tou"
 glyph = "投"
 pinyin = "tou"
-description = "支付 1 铜钱，将原格四邻的一枚非固定字移到指定空格"
+description = "支付 1 铜钱，将原格四邻的一枚未固定字移到指定空格"
 tags = Array[String](["economy", "space"])
 solo_effects = Array[ExtResource("2_wlrnf")]([SubResource("Effect")])
 solo_handler = "throw_neighbor"

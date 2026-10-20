@@ -10,7 +10,7 @@ handler = "refund_energy_half"
 amount = 0
 target = 0
 timing = "immediate"
-note = "返还最近一笔实际储能消费的一半，向上取整，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
+note = "返还最近一笔实际储能消费的一半，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_0fryj")
 id = "extra_fudian"
 word = "复电"
 glyphs = Array[String](["复", "电"])
-description = "返还最近一笔实际储能消费的一半，向上取整，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
+description = "返还最近一笔实际储能消费的一半，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
 effects = Array[ExtResource("1_2ama1")]([SubResource("Resource_vtbip")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "返还最近一笔实际储能消费的一半，向上取整，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
+effect_summary = "返还最近一笔实际储能消费的一半，再扣除该笔已有退款；每笔仅能用【复电】退款一次。"
 effect_handler_id = "refund_energy_half"
 priority = "蓄放"
 implemented = true

@@ -10,18 +10,18 @@ amount = 6
 args = {
 "per": 2
 }
-note = "造成一次6+2×当前热度的基础伤害，不消耗热度。"
+note = "造成一次6+2×当前热度的基础伤害。"
 
 [resource]
 script = ExtResource("2_oopf1")
 id = "w020"
 word = "火力"
 glyphs = Array[String](["火", "力"])
-description = "造成一次6+2×当前热度的基础伤害，不消耗热度。"
+description = "造成一次6+2×当前热度的基础伤害。"
 effects = Array[ExtResource("1_e0grs")]([SubResource("Resource_xvsri")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "造成一次6+2×当前热度的基础伤害，不消耗热度。"
+effect_summary = "造成一次6+2×当前热度的基础伤害。"
 effect_handler_id = "fire_power"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P3·补全词效"

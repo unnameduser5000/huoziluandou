@@ -7,6 +7,6 @@ script = ExtResource("1_dlwbn")
 id = "burn"
 name = "灼烧"
 glyph = "燃"
-description = "接下来 2 次敌方行动各受到一次灼烧伤害。"
+description = "每层每回合失去「当前热度 × 2」生命，结算后掉 1 层。"
 kind = 1
 color = Color(0.6901961, 0.32156864, 0.18039216, 1)

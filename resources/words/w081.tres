@@ -12,18 +12,18 @@ target = 5
 args = {
 "max": 4
 }
-note = "删除指定非固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
+note = "删除指定未固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
 
 [resource]
 script = ExtResource("2_am8i8")
 id = "w081"
 word = "分化"
 glyphs = Array[String](["分", "化"])
-description = "删除指定非固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
+description = "删除指定未固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
 effects = Array[ExtResource("1_ky8al")]([SubResource("Resource_xys43")])
 group = "空间"
 design_stage = "P23初稿；未完成分组复审"
-effect_summary = "删除指定非固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
+effect_summary = "删除指定未固定盘面字；在其四邻空格生成可与邻字或被删字配词的临时字。临时字用后移除。"
 effect_handler_id = "split_grow"
 requires_target = 5
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"

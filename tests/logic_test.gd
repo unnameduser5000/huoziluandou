@@ -733,7 +733,7 @@ func _test_ignite() -> void:
 	b.try_play([Vector2i(0, 0), Vector2i(1, 0)])
 	var before := e.hp
 	b.end_player_turn()
-	_ok(e.hp == before - 5, "放火：3+2热度 = 5 灼烧伤（实际 %d）" % (before - e.hp))
+	_ok(e.hp == before - 4, "放火：2 层灼烧，每次按当前热度 2×2 = 4 掉血（实际 %d）" % (before - e.hp))
 
 
 func _test_repeat_zero() -> void:

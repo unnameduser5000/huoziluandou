@@ -90,7 +90,6 @@ var temporary_heat_capacity: int = 0   ## 载：只撤销本回合额外增加�
 var flow_speed_rows: Dictionary = {}    ## 流速：行号 -> 本回合剩余补词次数，重复施放累加
 var last_shift_row: int = -1             ## 电力：最近一次行位移
 var last_shift_dir: int = 0
-var _double_armed: bool = false          ## 超能力：本词出字前已武装
 var _energy_regen_last_turn: int = -1    ## 回能：每回合最多发放一次，重施只刷新持续时间
 var overdo_count: int = 0                ## 过分：本场已打出【过分】的次数（伤害随次数递增）
 var _attack_sequence_depth := 0
@@ -309,8 +308,9 @@ func _warm_heart_sync(old_heat: int) -> void:
 	if delta == 0:
 		return
 	if delta > 0:
-		heal_player(delta * BattleBalance.i("warm_heal", 1))
-		_log("热心：热度 +%d，回复 %d 生命" % [delta, delta])
+		var warm_heal := delta * BattleBalance.i("warm_heal", 1) * passive_multiplier("热心")
+		heal_player(warm_heal)
+		_log("热心：热度 +%d，回复 %d 生命" % [delta, warm_heal])
 	else:
 		var real := player.take_damage(-delta * BattleBalance.i("warm_damage", 1))
 		_log("热心：热度 %d，失去 %d 生命" % [delta, real])
@@ -441,6 +441,34 @@ func refund_half_energy() -> int:
 	return refund
 
 ## 只有离开盘面后重新补入才刷新精炼；普通移动始终使用 board.set_xy。
+## 把刚打出的格子按原顺序补回（来源仍是字袋）；返回实际补了几枚。
+func refill_played_cells(consumed: Array, count: int) -> int:
+	if count <= 0:
+		return 0
+	var targets: Array = []
+	var seen := {}
+	for item in consumed:
+		var pos: Vector2i = item.pos
+		if item.kind != "real" or item.get("shared", false) or seen.has(pos):
+			continue
+		if board.get_xy(pos) != null:
+			continue
+		seen[pos] = true
+		targets.append(pos)
+	var placed := 0
+	for pos in targets:
+		if placed >= count:
+			break
+		ensure_bag()
+		if bag.is_empty():
+			break
+		place_from_pool(pos, bag.pop_back())
+		placed += 1
+	if placed > 0:
+		record_draw(placed, targets.size())
+	return placed
+
+
 func place_from_pool(pos: Vector2i, inst: CharInstance, counts_for_monster := true) -> void:
 	if inst.refined and not inst.temporary and not board.cells.has(inst):
 		inst.temporary_uses = maxi(inst.temporary_uses, BattleBalance.i("refined_layers", 2))
@@ -449,11 +477,10 @@ func place_from_pool(pos: Vector2i, inst: CharInstance, counts_for_monster := tr
 		monster_entered[inst.uid] = true
 
 ## 超能力只消耗于实际能够产生收益的持续能力，不被普通出词空耗。
+## 超能力：本回合内所有能力收益结算两遍（不消耗，回合结束清空；能力启用时的入场数值不翻倍）
 func passive_multiplier(label: String, has_reward: bool = true) -> int:
-	if not has_reward or not has_ability("double_next") or (_resolving_play and not _double_armed):
+	if not has_reward or not has_ability("double_next"):
 		return 1
-	abilities.erase("double_next")
-	_double_armed = false
 	_log("超能力：%s收益结算两遍" % label)
 	return BattleBalance.i("passive_multiplier", 2)
 
@@ -650,7 +677,6 @@ func try_play(path: Array, target: Dictionary = {}) -> Dictionary:
 	target = result.target
 	var word: WordData = result.word
 	var glyphs: Array = result.glyphs
-	_double_armed = ability_value("double_next", 0) > 0
 	var activates := _word_activates_formation(word)
 	if formation_mode or activates:
 		if activates:
@@ -827,7 +853,6 @@ func _execute_play_inner(play: Dictionary, shared: Dictionary) -> Dictionary:
 	var refill_was_active := has_ability("auto_refill")
 	if word != null and effects.any(func(e): return e.handler == "strength_growing"):
 		strengthen_plays += 1
-	_double_armed = ability_value("double_next", 0) > 0
 	var compound_armed := word != null and word.length() >= BattleBalance.i("long_word_threshold", 3) and has_ability("next_compound")
 	if compound_armed:
 		abilities.erase("next_compound")
@@ -976,7 +1001,7 @@ func _execute_play_inner(play: Dictionary, shared: Dictionary) -> Dictionary:
 			var distinct: Dictionary = {}
 			for wid in words_played_this_turn:
 				distinct[wid] = true
-			abilities["vigor_next"] = distinct.size()
+			abilities["vigor_next"] = distinct.size() * passive_multiplier("精力")
 		if _replays_attack(word):
 			# 连击重演了一个攻击词（可能是上回合的）：本回合算打出过攻击词，【回防】等条件能接上；
 			# 但不改写「上一个攻击词」，免得下一次连击重演的是连击自己
@@ -990,7 +1015,7 @@ func _execute_play_inner(play: Dictionary, shared: Dictionary) -> Dictionary:
 			last_attack_target_data = target.duplicate()
 			last_attack_path = path.duplicate()
 		if not end_turn_requested:
-			_trigger_on_word_abilities(word)
+			_trigger_on_word_abilities(word, consumed)
 		EventBus.word_played.emit(word, _join(glyphs))
 	else:
 		var first2: CharInstance = consumed[0].inst if not consumed.is_empty() else null
@@ -1140,8 +1165,6 @@ func activate_energy_regen(duration: int = 3) -> int:
 		enable_ability("energy_regen", remaining)
 	else:
 		abilities.erase("energy_regen")
-	if _energy_regen_last_turn == turn:
-		return 0
 	add_energy(BattleBalance.i("energy_regen", 2))
 	_energy_regen_last_turn = turn
 	return BattleBalance.i("energy_regen", 2)
@@ -1229,6 +1252,11 @@ func _replays_attack(word: WordData) -> bool:
 	return false
 
 
+## 流连：每层留字概率；层数由【流连】叠加，最多 2 层。
+func linger_chance() -> float:
+	return mini(100, ability_value("linger_chance", 1) * BattleBalance.i("linger_percent", 25)) / 100.0
+
+
 ## 消耗一个路径；返回 [{inst, kind}]，kind = real / layer / pinned / retained。
 
 func _consume_path(path: Array, expected: Array, shared: Dictionary) -> Array:
@@ -1274,7 +1302,7 @@ func _consume_path(path: Array, expected: Array, shared: Dictionary) -> Array:
 		elif Relics.stay_wax(self, inst):
 			item.kind = "retained"
 			_log("留字蜡：保留原位【%s】" % "".join(inst.glyph_list()))
-		elif has_ability("linger_chance") and rng.randf() < 0.5:
+		elif has_ability("linger_chance") and rng.randf() < linger_chance():
 			item.kind = "retained"
 			_log("流连：保留原位【%s】" % "".join(inst.glyph_list()))
 		else:
@@ -1319,7 +1347,7 @@ func _join(glyphs: Array) -> String:
 
 # ---------------------------------------------------------------- 持续能力 / 每回合
 
-func _trigger_on_word_abilities(word: WordData) -> void:
+func _trigger_on_word_abilities(word: WordData, consumed: Array = []) -> void:
 	if word == null:
 		return
 	if has_ability("accel"):
@@ -1345,9 +1373,10 @@ func _trigger_on_word_abilities(word: WordData) -> void:
 			abilities["next_serial_bonus"] = ability_value("next_serial_bonus") + sb
 			_log("连载：累计 %d 次出词，下一次攻击每段 +%d" % [serial_words, sb])
 	if has_ability("longword_draw") and word.length() >= BattleBalance.i("long_word_threshold", 3):
-		var mult := passive_multiplier("能力", board.free_count() > 0 and not (bag.is_empty() and discard.is_empty()))
-		var nk := draw_to_board(ability_value("longword_draw") * BattleBalance.i("longword_draw", 1) * mult)
-		_log("能力：打出长词，补 %d 字" % nk)
+		var mult := passive_multiplier("能力")
+		var want := ability_value("longword_draw") * BattleBalance.i("longword_draw", 3) * mult
+		var back := refill_played_cells(consumed, want)
+		_log("能力：打出 %d 字词，原位补 %d 字" % [word.length(), back])
 
 func _apply_next_word_flags(word: WordData) -> void:
 	if word == null:
@@ -1619,10 +1648,19 @@ func _enemy_act(e: Combatant, opening := false, skip_move := false) -> void:
 		EnemyMechanics.release_dead(self)
 		return
 	if skip_move:
+		# 急就章只推迟行动，灼烧在“本该行动的时点”照常结算
+		_tick_burn_before_action(e)
+		if not e.is_alive():
+			EnemyMechanics.release_dead(self)
+			return
 		e.move_index += 1
 		_log("急就章：%s 这一回合不行动" % e.display_name)
 		EnemyMechanics.after_action(self, e, mv)
 		_tick_after_action(e)
+		return
+	_tick_burn_before_action(e)
+	if not e.is_alive():
+		EnemyMechanics.release_dead(self)
 		return
 	enemy_acting.emit(e, mv)
 	e.move_index += 1
@@ -1685,21 +1723,22 @@ func _enemy_act(e: Combatant, opening := false, skip_move := false) -> void:
 	_tick_after_action(e)
 
 
-## 敌方每次行动后的持续伤害（灼烧、心蚀）
-func _tick_after_action(e: Combatant) -> void:
-	# 灼烧：敌方每次行动后扣一层
-	if e.is_alive() and e.status_stacks("burn") > 0:
-		var bd: int = int(e.status_data.get("burn_damage", BattleBalance.i("burn_default_damage", 3)))
-		var real_b := e.take_damage(bd)
-		if achievement != null and not e.is_alive(): achievement.emit_metrics([{"metric": "burn_kills", "amount": 1}])
-		e.add_status("burn", -1)
-		if e.status_stacks("burn") <= 0:
-			e.status_data.erase("burn_damage")
-		_log("灼烧：对 %s 造成 %d 伤害" % [e.display_name, real_b])
-		damage_dealt_this_turn += real_b
-		Relics.on_enemy_wounded(self, e)
-		_check_bounty()
+## 灼烧：每层在敌人行动【前】按当前热度掉血，然后掉 1 层（可叠加）
+func _tick_burn_before_action(e: Combatant) -> void:
+	if e == null or not e.is_alive() or e.status_stacks("burn") <= 0:
+		return
+	var bd: int = maxi(0, player.heat * BattleBalance.i("burn_heat_mult", 2))
+	var real_b := e.take_damage(bd)
+	if achievement != null and not e.is_alive(): achievement.emit_metrics([{"metric": "burn_kills", "amount": 1}])
+	e.add_status("burn", -1)
+	_log("灼烧：%s 行动前受到 %d 伤害" % [e.display_name, real_b])
+	damage_dealt_this_turn += real_b
+	Relics.on_enemy_wounded(self, e)
+	_check_bounty()
 
+
+## 敌方每次行动后的持续伤害（心蚀）
+func _tick_after_action(e: Combatant) -> void:
 	# 心蚀：敌方每次行动后扣等量层数的血（不衰减）
 	if e.is_alive() and e.status_stacks("heart_corrosion") > 0:
 		var hc := e.status_stacks("heart_corrosion")

@@ -22,6 +22,7 @@ var reward_options: Array = []
 var shop_offers: Array = []
 var event_data: Dictionary = {}
 var event_node := "start"
+var event_notes: Array[String] = []   ## 事件选项自带的“正文附言”（每次选择追加一行，如韫椟的“玉声近一寸”）
 var pending_event_next := ""
 var pending_glyphs: Array = []
 var pending_kind := ""
@@ -445,7 +446,10 @@ func _apply_upgrade(ch: CharacterData) -> void:
 
 
 func current_event() -> Dictionary:
-	return EventEffects.node(event_data, event_node)
+	var node_event: Dictionary = EventEffects.node(event_data, event_node)
+	if not event_notes.is_empty():
+		node_event["body"] = str(node_event.get("body", "")) + "\n" + "\n".join(event_notes)
+	return node_event
 
 
 func _start_event() -> void:
@@ -453,11 +457,19 @@ func _start_event() -> void:
 	event_data = LANTERN.fill(event_data, GameState.rng)
 	event_data = SHEFU.fill(event_data, GameState.rng)
 	event_node = "start"
+	event_notes.clear()
 	pending_event_next = ""
 	pending_event_effect.clear()
 	pending_event_relics.clear()
 	pending_glyphs.clear()
 	phase = "event"
+
+
+## 选项可用 "append" 把反馈写进正文（每次选择追加一行，只看当前事件）。
+func _remember_event_note(option: Dictionary) -> void:
+	var note := str(option.get("append", ""))
+	if not note.is_empty() and not event_notes.has(note):
+		event_notes.append(note)
 
 
 func _apply_event(action: Dictionary) -> Dictionary:
@@ -473,9 +485,12 @@ func _apply_event(action: Dictionary) -> Dictionary:
 	var option: Dictionary = options[index]
 	var result: Dictionary = EventEffects.resolve(option.get("effects", []), GameState.rng, true)
 	if not result.get("ok", false): return {"ok": false, "reason": str(result.get("reason", "事件结算失败"))}
+	for note in (result.get("notes", []) as Array):
+		if not event_notes.has(str(note)): event_notes.append(str(note))
 	pending_event_effect = result.get("pending", {})
 	pending_event_relics = result.get("relic_offers", [])
 	pending_event_next = str(option.get("goto", ""))
+	_remember_event_note(option)
 	if pending_event_effect.is_empty():
 		_advance_event()
 	else:
@@ -555,6 +570,7 @@ func _complete_node() -> void:
 	pending_event_next = ""
 	pending_glyphs.clear()
 	event_node = "start"
+	event_notes.clear()
 	GameState.clear_event_temp_hp()
 	GameState.complete_current_node()
 	if GameState.run_complete():

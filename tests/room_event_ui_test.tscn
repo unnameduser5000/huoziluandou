@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://tests/room_event_ui_test.gd" id="1"]
 
-[node name="RoomEventUITest" type="Node"]
+[node name="RoomEventUITest" type="Control"]
 script = ExtResource("1")

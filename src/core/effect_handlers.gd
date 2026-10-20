@@ -163,7 +163,7 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 			return ["甲：下回合开始获得 %d 点格挡（仅一次）" % amount]
 		"guard_halve":
 			src.turn_damage_halve = true
-			return [BattleBalance.fixed_text("放心：本回合受到伤害减半（向上取整，再 -1）", "guard_halve", eff)]
+			return [BattleBalance.fixed_text("放心：本回合受到伤害减半（减半后再 -1）", "guard_halve", eff)]
 		"ability_warm_heart":
 			b.enable_ability("warm_heart", 1)
 			return [BattleBalance.fixed_text("热心：本场持续——每获得 1 热度回复 1 生命，每失去 1 热度扣 1 生命", "ability_warm_heart", eff)]
@@ -324,8 +324,11 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 		"suspend_three":
 			return EffectHandlersActions._suspend_three(b, ctx)
 		"linger_chance":
-			b.enable_ability("linger_chance", BattleBalance.i("linger_percent", 50))
-			return [BattleBalance.fixed_text("流连：本回合后续打出的每个字有 50% 概率留在原位（不叠加）", "linger_chance", eff)]
+			var per := BattleBalance.i("linger_percent", 25)
+			var max_layers := BattleBalance.i("linger_layers_max", 2)
+			var layers := mini(b.ability_value("linger_chance") + 1, max_layers)
+			b.enable_ability("linger_chance", layers)
+			return ["流连：本回合后续每枚出字 %d%% 概率留在原位（%d/%d 层）" % [mini(per * layers, 100), layers, max_layers]]
 		"energy_regen":
 			var gained := b.activate_energy_regen(maxi(1, amount))
 			return [BattleBalance.fixed_text("回能：本回合储能 +%d，后续 %d 回合开局各获得 2 点储能", "energy_regen", eff) % [gained, b.ability_value("energy_regen")]]
@@ -368,7 +371,7 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 		"recover_two":
 			return EffectHandlersActions._recover_two(b, ctx)
 		"ability_longword_draw":
-			return EffectUtil.stack_ability(b, "longword_draw", BattleBalance.fixed_text("能力：本场持续——每打出 3 字及以上的词，额外补 1 字", "ability_longword_draw", eff))
+			return EffectUtil.stack_ability(b, "longword_draw", BattleBalance.fixed_text("能力：本场持续——每打出 3 字及以上的词，原位补 3 字", "ability_longword_draw", eff))
 		"ability_electric_material":
 			return EffectUtil.stack_ability(b, "electric_material", BattleBalance.fixed_text("电能：本场持续——每消耗 2 储能，随机空格生成临时【电】", "ability_electric_material", eff))
 		"ability_heat_to_energy":
@@ -515,21 +518,29 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 		"energy_discharge":
 			var spent: int = src.energy
 			b.spend_energy(spent)
+			var per_point: int = maxi(1, int(eff.args.get("hits_per_energy", 1)))
+			var refund: int = maxi(0, int(eff.args.get("refund", 0)))
 			var msgs: Array = []
+			var landed := 0
 			b.begin_attack_sequence()
-			for hit in spent:
+			for hit in spent * per_point:
 				if not src.is_alive():
 					break
 				if enemy == null or not enemy.is_alive():
 					enemy = b.first_alive_enemy()
 				if enemy == null:
 					break
+				var before_hp := enemy.hp
 				msgs.append_array(EffectUtil.damage(b, enemy, amount))
+				if enemy.hp < before_hp:
+					landed += 1
 			b.end_attack_sequence()
-			msgs.append("放电：消耗 %d 储能，每点 %d 伤" % [spent, amount])
-			if int(eff.args.get("draw_per", 0)) > 0:
-				var n6 := b.draw_to_board(spent * int(eff.args.get("draw_per", 1)))
-				msgs.append("充放电：补 %d 字" % n6)
+			msgs.append("放电：消耗 %d 储能，%d 段 %d 伤" % [spent, spent * per_point, amount])
+			# 充放电：每命中一段，下回合储能 +refund
+			if refund > 0 and landed > 0:
+				var gain := landed * refund
+				b.enable_ability("energy_next_turn", b.ability_value("energy_next_turn") + gain)
+				msgs.append("充放电：命中 %d 段，下回合储能 +%d" % [landed, gain])
 			return msgs
 
 		# --- 热暴 ---
@@ -564,7 +575,7 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 			var dmg7: int = amount * reduce
 			return EffectUtil.damage(b, enemy, dmg7) + ["热流：降热 %d" % reduce]
 		"ability_reload":
-			src.heat_capacity += amount
+			src.heat_capacity += amount * b.passive_multiplier("重载")
 			b.add_heat(0)
 			b.next_draw_penalty += int(eff.args.get("draw_penalty", 1))
 			return ["重载：本场热容 +%d，仅下回合补字 -%d" % [amount, int(eff.args.get("draw_penalty", 1))]]
@@ -728,10 +739,9 @@ static func run_builtin(handler: String, eff: EffectData, ctx: Dictionary) -> Ar
 			return ["停火：本回合未造成敌伤则免疫敌方攻击"]
 		"ignite":
 			if enemy != null:
-				var burn_dmg: int = amount + BattleBalance.i("burn_heat_mult", 1) * src.heat
-				enemy.statuses["burn"] = BattleBalance.i("burn_actions", 2)
-				enemy.status_data["burn_damage"] = burn_dmg
-				return [BattleBalance.fixed_text("放火：敌方灼烧 2 次，每次 %d 伤", "ignite", eff) % burn_dmg]
+				var layers: int = BattleBalance.i("burn_layers", 2)
+				enemy.add_status("burn", layers)
+				return ["放火：【%s】获得 %d 层灼烧（每层每回合失去当前热度×%d 生命）" % [enemy.display_name, layers, BattleBalance.i("burn_heat_mult", 2)]]
 			return []
 
 		# ---- 连携 P3 ----

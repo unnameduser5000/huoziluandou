@@ -5,27 +5,33 @@ const LANES := 5
 const PATHS := 6
 const MIN_NODES := 46
 const MAX_NODES := 64
+const FIRST_SPECIAL_ROW := 5 # Elites and random rest sites start at stop six.
+# Spire-style room bag. Use the A1+ elite density to retain elite route choices.
+const ROOM_SHARES := {"shop":.05, "rest":.12, "elite":.128, "event":.22}
 
 
 static func generate(seed_value: int, act: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash("node-route:%d:%d:v2" % [seed_value, act])
 	var graph := {}
-	# Retry only the topology; the total is a range, not a fixed number of slots.
-	for attempt in 12:
+	var ordered: Array = []
+	var fitted := false
+	for layout_attempt in 32:
 		graph = _routes(seed_value, act, rng)
-		if graph.rooms.size() >= MIN_NODES and graph.rooms.size() <= MAX_NODES and _has_choices(graph): break
-	var ordered: Array = graph.rooms.keys()
-	ordered.sort_custom(func(a, b):
-		var left: Dictionary = graph.rooms[a]
-		var right: Dictionary = graph.rooms[b]
-		return left.row < right.row if left.row != right.row else left.lane < right.lane)
-	var sorted_rooms := {}
-	for id: String in ordered: sorted_rooms[id] = graph.rooms[id]
-	graph.rooms = sorted_rooms
-	for attempt in 24:
-		if _encounters(graph, ordered, rng): break
-		if attempt == 23: _fallback_encounters(graph, rng)
+		if graph.rooms.size() < MIN_NODES or graph.rooms.size() > MAX_NODES or not _has_choices(graph): continue
+		ordered = graph.rooms.keys()
+		ordered.sort_custom(func(a, b):
+			var left: Dictionary = graph.rooms[a]
+			var right: Dictionary = graph.rooms[b]
+			return left.row < right.row if left.row != right.row else left.lane < right.lane)
+		var sorted_rooms := {}
+		for id: String in ordered: sorted_rooms[id] = graph.rooms[id]
+		graph.rooms = sorted_rooms
+		fitted = true
+		break
+	if not fitted:
+		return {"rooms":{}, "generation_error":"未能生成连通的分叉路线，请重新开始冒险。"}
+	_encounters(graph, ordered, rng)
 	for id: String in ordered:
 		var spec: Dictionary = graph.rooms[id]
 		spec.number = ordered.find(id) + 1
@@ -38,7 +44,7 @@ static func generate(seed_value: int, act: int) -> Dictionary:
 
 static func _routes(seed_value: int, act: int, rng: RandomNumberGenerator) -> Dictionary:
 	var graph := {"schema":1, "layout_kind":"node_graph", "layout_version":2,
-		"seed":seed_value, "act":act, "lane_count":LANES, "rooms":{}, "edges":[], "groups":[], "start":"start", "boss":"boss"}
+		"encounter_version":4, "seed":seed_value, "act":act, "lane_count":LANES, "rooms":{}, "edges":[], "groups":[], "start":"start", "boss":"boss"}
 	_add(graph, "start", -1, (LANES - 1) * .5)
 	var starts: Array = [rng.randi_range(0, 1), 2, rng.randi_range(3, 4)]
 	if rng.randf() < .45:
@@ -70,47 +76,68 @@ static func _routes(seed_value: int, act: int, rng: RandomNumberGenerator) -> Di
 	return graph
 
 
-static func _encounters(graph: Dictionary, ordered: Array, rng: RandomNumberGenerator) -> bool:
-	var events := {}
-	var event_choices: Array = []
-	for id: String in ordered:
-		var row: int = graph.rooms[id].row
-		var eligible := row > 0 and row < COLUMNS - 1 and row != 8
-		events[id] = eligible and rng.randf() < .28
-		if eligible: event_choices.append(id)
-	# Keep the existing 3–5 event budget, without putting events in fixed columns.
-	if not _balance(graph, ordered, events, event_choices, 3, 5, rng): return false
-	var combat := {}
-	var combat_choices: Array = []
-	for id: String in ordered:
-		var row: int = graph.rooms[id].row
-		var eligible: bool = row >= 0 and row < COLUMNS - 1 and row != 8 and not events[id]
-		combat[id] = eligible and (row < 3 or row == 13 or rng.randf() < .72)
-		if eligible and row >= 3 and row < 13: combat_choices.append(id)
-	if not _balance(graph, ordered, combat, combat_choices, 6, 9, rng): return false
+static func _encounters(graph: Dictionary, ordered: Array, rng: RandomNumberGenerator) -> void:
+	# Prepare all types together, rather than spending events first and filling
+	# the rest with combat. No per-route event, combat or elite-count targets.
+	var unassigned: Array = []
+	var quota_basis := 0
 	for id: String in ordered:
 		var spec: Dictionary = graph.rooms[id]
+		spec.kind = ""
+		# Match the reference count: connected map nodes except the penultimate
+		# stop. Entry/boss are separate from the fifteen playable map columns.
+		if spec.row >= 0 and spec.row < COLUMNS and spec.row != COLUMNS - 2: quota_basis += 1
 		if id == graph.start: spec.kind = "start"
 		elif id == graph.boss: spec.kind = "boss"
+		elif spec.row == 0: spec.kind = "battle"
 		elif spec.row == 8: spec.kind = "treasure"
 		elif spec.row == COLUMNS - 1: spec.kind = "rest"
-		elif events[id]: spec.kind = "event"
-		elif combat[id]:
-			spec.kind = "elite" if spec.row >= 4 and not _neighbour_kind(graph, id, "elite", false) and rng.randf() < .22 else "battle"
-		else:
-			var services: Array = ["rest", "shop"].filter(func(kind): return not _neighbour_kind(graph, id, kind, false))
-			# A merge with both services before it gets combat instead of a repeat.
-			spec.kind = services[rng.randi_range(0, services.size() - 1)] if not services.is_empty() else "battle"
-	if not graph.rooms.values().any(func(spec): return spec.kind == "elite"):
-		var battles: Array = ordered.filter(func(id): return graph.rooms[id].kind == "battle" and graph.rooms[id].row >= 4)
-		if battles.is_empty(): return false
-		graph.rooms[battles[rng.randi_range(0, battles.size() - 1)]].kind = "elite"
-	var columns := {}
-	for spec: Dictionary in graph.rooms.values():
-		if not columns.has(spec.row): columns[spec.row] = {}
-		columns[spec.row][spec.kind] = true
-	var mixed: int = columns.values().filter(func(kinds): return kinds.size() > 1).size()
-	return mixed >= 5 and graph.rooms.values().any(func(spec): return spec.kind == "shop")
+		else: unassigned.append(id)
+	var bag: Array = []
+	var quotas := {}
+	for kind: String in ROOM_SHARES:
+		quotas[kind] = roundi(quota_basis * ROOM_SHARES[kind])
+		for count in quotas[kind]: bag.append(kind)
+	while bag.size() < unassigned.size(): bag.append("battle")
+	_shuffle(bag, rng)
+	var defaulted: Array = []
+	for id: String in unassigned:
+		var chosen := -1
+		for index in bag.size():
+			if _can_assign(graph, id, bag[index]): chosen = index; break
+		if chosen >= 0: graph.rooms[id].kind = bag.pop_at(chosen)
+		else: defaulted.append(id)
+	# Only an unfillable slot falls back to ordinary combat. It does not turn
+	# a whole column into a service, event or elite and does not reroll paths.
+	for id: String in defaulted: graph.rooms[id].kind = "battle"
+	var unused := {}
+	for kind: String in bag: unused[kind] = int(unused.get(kind, 0)) + 1
+	graph["room_quotas"] = quotas
+	graph["quota_basis"] = quota_basis
+	graph["unplaced_rooms"] = unused
+	graph["defaulted_rooms"] = defaulted
+
+
+static func _can_assign(graph: Dictionary, id: String, kind: String) -> bool:
+	var row: int = graph.rooms[id].row
+	if kind in ["elite", "rest"] and row < FIRST_SPECIAL_ROW: return false
+	if kind == "rest" and row >= COLUMNS - 2: return false
+	if kind in ["elite", "rest", "shop", "treasure"] and _neighbour_kind(graph, id, kind, false): return false
+	return not _sibling_kind(graph, id, kind)
+
+
+static func _shuffle(items: Array, rng: RandomNumberGenerator) -> void:
+	for index in range(items.size() - 1, 0, -1):
+		var other := rng.randi_range(0, index)
+		var saved = items[index]
+		items[index] = items[other]; items[other] = saved
+
+
+static func _sibling_kind(graph: Dictionary, id: String, kind: String) -> bool:
+	for parent: String in graph.rooms[id].previous:
+		for sibling: String in graph.rooms[parent].next:
+			if sibling != id and graph.rooms[sibling].get("kind", "") == kind: return true
+	return false
 
 
 static func _has_choices(graph: Dictionary) -> bool:
@@ -123,71 +150,6 @@ static func _has_choices(graph: Dictionary) -> bool:
 			var count: int = minimum[id] + int(spec.next.size() > 1)
 			for target: String in spec.next: minimum[target] = mini(int(minimum.get(target, COLUMNS)), count)
 	return int(minimum[graph.boss]) >= 4
-
-
-## Flip event/combat flags to satisfy budgets across every possible route, not just
-## the six walks used to draw the graph. Prefix/suffix histograms count merged routes.
-static func _balance(graph: Dictionary, ordered: Array, flags: Dictionary, choices: Array, lower: int, upper: int, rng: RandomNumberGenerator) -> bool:
-	for step in 40:
-		var prefix := {}
-		var suffix := {}
-		for id: String in ordered:
-			prefix[id] = _histogram(); suffix[id] = _histogram()
-		prefix[graph.start][0] = 1
-		for id: String in ordered:
-			for next: String in graph.rooms[id].next:
-				for count in COLUMNS:
-					if prefix[id][count]: prefix[next][count + int(flags[next])] += prefix[id][count]
-		suffix[graph.boss][0] = 1
-		for index in range(ordered.size() - 1, -1, -1):
-			var id: String = ordered[index]
-			for next: String in graph.rooms[id].next:
-				for count in COLUMNS:
-					if suffix[next][count]: suffix[id][count + int(flags[next])] += suffix[next][count]
-		var score := 0
-		for count in COLUMNS + 1: score += prefix[graph.boss][count] * _penalty(count, lower, upper)
-		if score == 0: return true
-		var best_delta := 0
-		var best: Array = []
-		for id: String in choices:
-			var change := -1 if flags[id] else 1
-			var delta := 0
-			for before in COLUMNS + 1:
-				if not prefix[id][before]: continue
-				for after in COLUMNS + 1 - before:
-					if not suffix[id][after]: continue
-					delta += prefix[id][before] * suffix[id][after] * (_penalty(before + after + change, lower, upper) - _penalty(before + after, lower, upper))
-			if delta < best_delta: best_delta = delta; best = [id]
-			elif delta == best_delta and delta < 0: best.append(id)
-		if best.is_empty(): return false
-		var chosen: String = best[rng.randi_range(0, best.size() - 1)]
-		flags[chosen] = not flags[chosen]
-	return false
-
-
-static func _histogram() -> Array:
-	var result: Array = []; result.resize(COLUMNS + 1); result.fill(0)
-	return result
-
-
-static func _penalty(count: int, lower: int, upper: int) -> int:
-	var distance := maxi(lower - count, maxi(0, count - upper))
-	return distance * distance
-
-
-static func _fallback_encounters(graph: Dictionary, rng: RandomNumberGenerator) -> void:
-	# Bounded safety net if content constraints ever conflict; topology stays intact.
-	var events := [rng.randi_range(1, 2), rng.randi_range(4, 5), rng.randi_range(10, 11)]
-	for spec: Dictionary in graph.rooms.values():
-		if spec.row == -1: spec.kind = "start"
-		elif spec.row == COLUMNS: spec.kind = "boss"
-		elif spec.row == 8: spec.kind = "treasure"
-		elif spec.row == 14 or spec.row == 12: spec.kind = "rest"
-		elif spec.row == 6: spec.kind = "shop"
-		elif events.has(spec.row): spec.kind = "event"
-		elif spec.row == 9: spec.kind = "elite"
-		else: spec.kind = "battle"
-	graph["content_fallback"] = true
 
 
 static func _neighbour_kind(graph: Dictionary, id: String, kind: String, include_next := true) -> bool:

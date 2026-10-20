@@ -9,18 +9,18 @@ kind = 6
 handler = "apply_status_enemy"
 amount = 2
 status_id = "vulnerable"
-note = "使目标获得2层易伤：受到的伤害提高50%（向上取整），每回合开始减少1层。重复施放叠加层数，伤害增幅仍为50%。"
+note = "使目标获得 2 层易伤：受到伤害提高 50%，每回合开始少 1 层。增幅始终是 50%。"
 
 [resource]
 script = ExtResource("2_250c1")
 id = "w009"
 word = "破防"
 glyphs = Array[String](["破", "防"])
-description = "使目标获得2层易伤：受到的伤害提高50%（向上取整），每回合开始减少1层。重复施放叠加层数，伤害增幅仍为50%。"
+description = "使目标获得 2 层易伤：受到伤害提高 50%，每回合开始少 1 层。增幅始终是 50%。"
 effects = Array[ExtResource("1_ebdfu")]([SubResource("Resource_5mug4")])
 group = "防反"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "使目标获得2层易伤：受到的伤害提高50%（向上取整），每回合开始减少1层。重复施放叠加层数，伤害增幅仍为50%。"
+effect_summary = "使目标获得 2 层易伤：受到伤害提高 50%，每回合开始少 1 层。增幅始终是 50%。"
 effect_handler_id = "apply_status_enemy"
 p25_implemented = true
 implementation_delta = "—"

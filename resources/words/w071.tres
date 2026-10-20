@@ -9,18 +9,18 @@ kind = 29
 handler = "gild_glyph"
 amount = 3
 args = {"cost": 3}
-note = "支付3铜钱，选择字袋中一枚未镀金的实体字永久镀金；该字每次单独打出或参与组词获得1铜钱。"
+note = "支付3铜钱，选择字袋中一枚未镀金的字块永久镀金；该字每次单独打出或参与组词获得1铜钱。"
 
 [resource]
 script = ExtResource("2_21vlh")
 id = "w071"
 word = "投资"
 glyphs = Array[String](["投", "资"])
-description = "支付3铜钱，选择字袋中一枚未镀金的实体字永久镀金；该字每次单独打出或参与组词获得1铜钱。"
+description = "支付3铜钱，选择字袋中一枚未镀金的字块永久镀金；该字每次单独打出或参与组词获得1铜钱。"
 effects = Array[ExtResource("1_05qhn")]([SubResource("Economy_0")])
 group = "经济"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "支付3铜钱，选择字袋中一枚未镀金的实体字永久镀金；该字每次单独打出或参与组词获得1铜钱。"
+effect_summary = "支付3铜钱，选择字袋中一枚未镀金的字块永久镀金；该字每次单独打出或参与组词获得1铜钱。"
 effect_handler_id = "gild_glyph"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P1·重点机制"

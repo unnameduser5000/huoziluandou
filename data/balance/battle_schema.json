@@ -3165,8 +3165,8 @@
           "words/w090/e/0/amount",
           "加热",
           "效果1·基础值",
-          3,
-          3,
+          5,
+          5,
           -999,
           9999,
           "点",
@@ -4463,7 +4463,7 @@
         [
           "core/burn_actions",
           "放火",
-          "放火：灼烧行动次数",
+          "放火：灼烧层数（旧键）",
           2,
           2,
           1,
@@ -4567,6 +4567,18 @@
           "点",
           "src/core/battle_state.gd: e.status_data.get(\"burn_damage\", 3)",
           "src/core/battle_state.gd"
+        ],
+        [
+          "core/burn_layers",
+          "放火",
+          "放火：灼烧层数",
+          2,
+          2,
+          1,
+          9,
+          "层",
+          "处理器 ignite；给目标叠加若干层灼烧，每层每回合按当前热度掉血",
+          "src/core/effect_handlers.gd"
         ]
       ],
       "parameter_table": true
@@ -4962,8 +4974,8 @@
           "core/linger_percent",
           "流连",
           "流连：留盘概率百分比",
-          50,
-          50,
+          25,
+          25,
           0,
           100,
           "%",
@@ -5645,13 +5657,13 @@
         [
           "core/burn_heat_mult",
           "放火",
-          "放火：每点热度附加灼烧伤害",
-          1,
-          1,
+          "灼烧：每点当前热度造成的伤害",
+          2,
+          2,
           0,
           999,
           "点",
-          "src/core/effect_handlers.gd: amount + src.heat",
+          "处理器 ignite / _tick_after_action：每层每回合失去当前热度×2 生命",
           "src/core/effect_handlers.gd"
         ],
         [
@@ -5693,13 +5705,13 @@
         [
           "core/longword_draw",
           "能力",
-          "能力：长词额外补字数",
-          1,
+          "能力：长词原位补字数",
+          3,
           1,
           0,
           999,
           "点",
-          "src/core/battle_state.gd: ability_value(\"longword_draw\", 1)",
+          "src/core/battle_state.gd: ability_value(\"longword_draw\", 3)",
           "src/core/battle_state.gd"
         ],
         [
@@ -14366,7 +14378,7 @@
       "source": "src/core/effect_handlers.gd"
     },
     "core/linger_percent": {
-      "default": 50,
+      "default": 25,
       "min": 0,
       "max": 100,
       "integer": true,
@@ -14509,9 +14521,9 @@
     "core/burn_actions": {
       "default": 2,
       "min": 1,
-      "max": 999,
+      "max": 9,
       "integer": true,
-      "label": "放火：灼烧行动次数",
+      "label": "放火：灼烧层数（旧键，等同 burn_layers）",
       "name": "放火",
       "group": "状态参数",
       "core": "burn_actions",
@@ -15478,18 +15490,18 @@
       "source": "src/core/battle_state.gd"
     },
     "core/burn_heat_mult": {
-      "default": 1,
+      "default": 2,
       "min": 0,
       "max": 999,
       "integer": true,
-      "label": "放火：每点热度附加灼烧伤害",
-      "name": "放火",
-      "group": "战斗机制",
+      "label": "灼烧：每点当前热度造成的伤害",
+      "name": "灼烧",
+      "group": "状态参数",
       "core": "burn_heat_mult",
       "handlers": [
         "ignite"
       ],
-      "source": "src/core/effect_handlers.gd"
+      "source": "src/core/battle_state.gd"
     },
     "core/tail_energy_mult": {
       "default": 1,
@@ -15631,11 +15643,11 @@
       "source": "src/expedition/expedition.gd"
     },
     "core/longword_draw": {
-      "default": 1,
+      "default": 3,
       "min": 0,
       "max": 999,
       "integer": true,
-      "label": "能力：长词额外补字数",
+      "label": "能力：长词原位补字数",
       "name": "能力",
       "group": "战斗机制",
       "core": "longword_draw",
@@ -15761,6 +15773,20 @@
         "ability_strong_heart"
       ],
       "source": "src/core/battle_state.gd"
+    },
+    "core/burn_layers": {
+      "default": 2,
+      "min": 1,
+      "max": 9,
+      "integer": true,
+      "label": "放火：灼烧层数",
+      "name": "放火",
+      "group": "状态参数",
+      "core": "burn_layers",
+      "handlers": [
+        "ignite"
+      ],
+      "source": "src/core/effect_handlers.gd"
     }
   },
   "resources": [
@@ -21599,7 +21625,7 @@
         "ability_longword_draw"
       ],
       "sources": [
-        "src/core/battle_state.gd: ability_value(\"longword_draw\", 1)"
+        "src/core/battle_state.gd: ability_value(\"longword_draw\", 3)"
       ]
     },
     {
@@ -21727,6 +21753,21 @@
       ],
       "sources": [
         "src/core/battle_state.gd:  + player.heart_power_triggered"
+      ]
+    },
+    {
+      "id": "burn_layers",
+      "default": 2,
+      "label": "放火：灼烧层数",
+      "min": 1,
+      "max": 9,
+      "unit": "层",
+      "group": "状态参数",
+      "handlers": [
+        "ignite"
+      ],
+      "sources": [
+        "src/core/effect_handlers.gd: enemy.add_status(\"burn\", 2)"
       ]
     }
   ],

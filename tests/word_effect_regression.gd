@@ -152,7 +152,7 @@ func _run_vulnerable() -> void:
 	b.end_player_turn()
 	_check("vulnerable_multi_enemy_expire", not enemy.statuses.has("vulnerable") and not other.statuses.has("vulnerable"), "多个敌人的易伤各自到期，不会保留零层状态")
 	var word := Database.get_word_by_glyphs_string("破防")
-	_check("vulnerable_copy_synced", word.describe() == BattleText.word(word) and "易伤" in EffectGlossary.brief(word) and "每回合开始减少1层" in word.effects[0].note and "敌我双方每回合开始减少1层" in EffectGlossary.entry("term:vulnerable").text, "破防资源、完整说明、精简说明和wiki词条都使用衰减规则")
+	_check("vulnerable_copy_synced", word.describe() == BattleText.word(word) and "易伤" in EffectGlossary.brief(word) and "每回合开始少 1 层" in word.effects[0].note and "敌我双方每回合开始减少1层" in EffectGlossary.entry("term:vulnerable").text, "破防资源、完整说明、精简说明和wiki词条都使用衰减规则")
 
 func _run_description_previews() -> void:
 	var unified := true
@@ -160,7 +160,7 @@ func _run_description_previews() -> void:
 		unified = unified and word.describe() == BattleText.word(word) and word.description == word.effect_summary
 		for stale in ["P23初稿", "尚未收敛", "临时草案", "未定稿", "倾向删除"]:
 			unified = unified and not stale in word.describe()
-	_check("word_description_source", unified and WordDescriptions.TEXT.size() == Database.words.size(), "全部%d词共享完整说明，游戏介绍没有旧设计草稿" % Database.words.size())
+	_check("word_description_source", unified and BattleText.WORDS.size() == Database.words.size(), "全部%d词共享完整说明，游戏介绍没有旧设计草稿" % Database.words.size())
 	var b := _battle()
 	var pos := Vector2i(3, 3)
 	var source := _place(b, pos, "再")
@@ -208,7 +208,7 @@ func _run_description_previews() -> void:
 	_word(b, "重击")
 	_word(b, "防御")
 	text = EffectPreview.word_text(Database.get_word_by_glyphs_string("连击"), b)
-	_check("preview_replay_attack_source", "将重演【重击】" in text, "连击显示最近攻击词，普通防御词不会覆盖来源")
+	_check("preview_replay_attack_source", "再结算一次【重击】" in text, "连击显示最近攻击词，普通防御词不会覆盖来源")
 	text = EffectPreview.word_text(Database.get_word_by_glyphs_string("回放"), b)
 	_check("preview_replay_materials", "上一词【防御】" in text and "【防】" in text and "【御】" in text, "回放说明上一词及当前仍能返还的实体材料")
 	b = _battle()
@@ -367,7 +367,7 @@ func _run_word_balance() -> void:
 	var pending := b.has_ability("double_next")
 	b.add_heat(2)
 	b.end_player_turn()
-	_check("double_passive_idle", pending and b.player.energy == 4 and b.player.heat == 0 and not b.has_ability("double_next"), "普通出词不空耗超能力，蓄热只降2热但获得4能")
+	_check("double_passive_idle", pending and b.player.energy == 4 and b.player.heat == 0 and not b.has_ability("double_next"), "普通出词不空耗超能力，蓄热只降2热但获得4能；跨回合后翻倍结束")
 	b = _battle()
 	b.player.hp = 40
 	_word(b, "强心")
@@ -565,17 +565,17 @@ func _run_word_completion() -> void:
 	_word(b, "流连")
 	var forecast := RandomNumberGenerator.new()
 	forecast.state = b.rng.state
-	var keep_solo := forecast.randf() < 0.5
+	var keep_solo := forecast.randf() < 0.25
 	var solo := _place(b, Vector2i(3, 3), "防")
 	b.try_play([Vector2i(3, 3)])
-	_check("linger_applies_to_solo", b.ability_value("linger_chance") == 50 and (b.board.get_cell(3, 3) == solo) == keep_solo and b.discard.has(solo) == (not keep_solo), "单字也以50%概率保留原实体，流连本回合继续有效")
+	_check("linger_applies_to_solo", b.ability_value("linger_chance") == 1 and (b.board.get_cell(3, 3) == solo) == keep_solo and b.discard.has(solo) == (not keep_solo), "单字也以 25% 概率保留原实体，流连本回合继续有效")
 	var head := _place(b, Vector2i(0, 1), "防")
 	var tail := _place(b, Vector2i(1, 1), "御")
 	tail.gilded = true
 	tail.add_pollution("rush")
 	forecast.state = b.rng.state
-	var keep_head := forecast.randf() < 0.5
-	var keep_tail := forecast.randf() < 0.5
+	var keep_head := forecast.randf() < 0.25
+	var keep_tail := forecast.randf() < 0.25
 	b.try_play([Vector2i(0, 1), Vector2i(1, 1)])
 	_check("linger_independent_originals", (b.board.get_cell(0, 1) == head) == keep_head and (b.board.get_cell(1, 1) == tail) == keep_tail and b.discard.has(head) == (not keep_head) and b.discard.has(tail) == (not keep_tail) and tail.gilded and tail.pollutions == ["rush"] and not tail.temporary and _unique_circulation(b), "每枚字独立判定，留下原实例及属性，不制造临时复制")
 	b.begin_player_turn(false)
@@ -595,7 +595,7 @@ func _run_word_completion() -> void:
 	tail.owner = CharInstance.Owner.ENEMY
 	tail.temporary = true
 	forecast.state = b.rng.state
-	keep_tail = forecast.randf() < 0.5
+	keep_tail = forecast.randf() < 0.25
 	b.try_play([Vector2i(3, 3)])
 	_check("linger_enemy_original", (b.board.get_cell(3, 3) == tail) == keep_tail and tail.owner == CharInstance.Owner.ENEMY and tail.temporary and not b.discard.has(tail) and _unique_circulation(b), "敌方和临时字也独立判定；成功时保留原归属，失败时照常消失")
 
@@ -604,11 +604,11 @@ func _run_word_completion() -> void:
 	_word(b, "回能")
 	var energy_by_turn := [b.player.energy]
 	_word(b, "回能", 1)
-	var refresh_once: bool = b.player.energy == 4 and b.ability_value("energy_regen") == 2
+	var double_cast: bool = b.player.energy == 6 and b.ability_value("energy_regen") == 2
 	for i in 3:
 		b.begin_player_turn(false)
 		energy_by_turn.append(b.player.energy)
-	_check("restore_energy_three_turns", energy_by_turn == [4, 6, 8, 8] and refresh_once and not b.has_ability("energy_regen") and b.attack_words_this_turn == 0, "含施放回合共三次各2储能，同回合重施只刷新，第四回合停止")
+	_check("restore_energy_three_turns", energy_by_turn == [4, 8, 10, 10] and double_cast and not b.has_ability("energy_regen") and b.attack_words_this_turn == 0, "打出当回合各给 2 储能（4→6），之后两回合开局各再 +2（8、10），第四回合停止")
 	b = _battle()
 	_word(b, "防反")
 	_check("guard_counter_arm", b.player.block == 6 and b.ability_value("counter") == 1 and b.attack_words_this_turn == 0, "防反先提供六临挡，再预约一层延迟反击")
@@ -1542,7 +1542,7 @@ func _run_logic() -> void:
 	b.add_heat(5)
 	_word(b, "放火", 1, {"target_index": 1})
 	b.end_player_turn()
-	_check("burn_per_enemy", b.enemies[0].hp == 197 and b.enemies[1].hp == 192, "两敌分别在热0/热5时被放火，灼烧伤害=%d/%d，预期3/8" % [200 - b.enemies[0].hp, 200 - b.enemies[1].hp])
+	_check("burn_per_enemy", b.enemies[0].hp == 190 and b.enemies[1].hp == 190, "灼烧按「结算时」热度掉血：双方都按热5×2 = 10（实际 %d/%d）" % [200 - b.enemies[0].hp, 200 - b.enemies[1].hp])
 
 	b = _battle()
 	b.player.energy = 3
@@ -1916,7 +1916,7 @@ func _run_boundaries() -> void:
 	_word(b, "放火", 1)
 	b.end_player_turn()
 	b.end_player_turn()
-	_check("burn_refresh", b.enemies[0].hp == 186 and b.enemies[0].status_stacks("burn") == 0, "重复放火刷新为最近施放数值及两次行动，不覆盖其他敌人")
+	_check("burn_stacks", b.enemies[0].hp == 184 and b.enemies[0].status_stacks("burn") == 2, "两次放火叠成 4 层：当回合按热度4烧两次、余 2 层（实际 %d）" % (200 - b.enemies[0].hp))
 
 	b = _battle()
 	_enemy(b)
@@ -2208,7 +2208,7 @@ func _run_ui_word_completion() -> void:
 			"流速": effected = screen.battle.flow_speed_rows.get(1, 0) == 2
 			"重回": effected = screen.battle.bag.has(prior) and not screen.battle.discard.has(prior)
 			"重连": effected = screen.battle.reconnect_pending.size() == 3
-			"流连": effected = screen.battle.ability_value("linger_chance") == 50
+			"流连": effected = screen.battle.ability_value("linger_chance") == 1
 			"回心": effected = screen.battle.player.hp == 31 and screen._player_hp.value == 31 and screen.battle.board.fill_count() == 3
 			"回能": effected = screen.battle.player.energy == 2 and screen.battle.ability_value("energy_regen") == 2
 			"防反": effected = screen.battle.player.block == 6 and screen.battle.ability_value("counter") == 1

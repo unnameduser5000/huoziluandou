@@ -9,14 +9,14 @@ kind = 29
 handler = "refine_junk_neighbor"
 amount = 0
 target = 5
-note = "选择原格四邻的一枚非固定敌方字、临时字或自生污染字，移除并获得 1 铜钱、热度 +1；不移除永久己方字"
+note = "选择原格四邻的一枚未固定敌方字、临时字或自生污染字，移除并获得 1 铜钱、热度 +1；不移除永久己方字"
 
 [resource]
 script = ExtResource("1_cgvy4")
 id = "lian2"
 glyph = "炼"
 pinyin = "lian"
-description = "选择原格四邻的一枚非固定敌方字、临时字或自生污染字，移除并获得 1 铜钱、热度 +1；不移除永久己方字"
+description = "选择原格四邻的一枚未固定敌方字、临时字或自生污染字，移除并获得 1 铜钱、热度 +1；不移除永久己方字"
 tags = Array[String](["economy"])
 rarity = 2
 solo_effects = Array[ExtResource("2_1c1qt")]([SubResource("Effect")])

@@ -43,6 +43,7 @@ func open_event(event_id := "old_bookshop", deck: Array = []) -> void:
 
 
 func _run() -> void:
+	SaveManager.enabled = false
 	GameState.set_meta("courtyard_preview", true)
 	Settings.reduced_motion = true
 	Engine.max_fps = 120

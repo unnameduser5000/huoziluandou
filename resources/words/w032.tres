@@ -24,6 +24,6 @@ effect_summary = "从弃字堆回收本回合消耗的 1 枚字到袋顶"
 effect_handler_id = "recover_consumed"
 requires_target = 8
 p25_implemented = true
-implementation_delta = "P25自动取最后一枚弃字，正式需选择本回合用过的实体字"
+implementation_delta = "P25自动取最后一枚弃字，正式需选择本回合用过的字块"
 priority = "P2·已试运行"
 implemented = true

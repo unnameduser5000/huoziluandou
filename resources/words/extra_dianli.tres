@@ -8,18 +8,18 @@ script = ExtResource("1_2p4sq")
 kind = 28
 handler = "instant_power"
 timing = "persistent"
-note = "本场通过词效循环移动一行后，有储能就自动消耗1点，向同方向再移1格；行列翻转、重力不触发。"
+note = "本场：打出【左击】【右击】后，自动花 1 储能，把那行再移 1 格。"
 
 [resource]
 script = ExtResource("2_35she")
 id = "extra_dianli"
 word = "电力"
 glyphs = Array[String](["电", "力"])
-description = "本场通过词效循环移动一行后，有储能就自动消耗1点，向同方向再移1格；行列翻转、重力不触发。"
+description = "本场：打出【左击】【右击】后，自动花 1 储能，把那行再移 1 格。"
 effects = Array[ExtResource("1_2p4sq")]([SubResource("Resource_hmbsi")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "本场通过词效循环移动一行后，有储能就自动消耗1点，向同方向再移1格；行列翻转、重力不触发。"
+effect_summary = "本场：打出【左击】【右击】后，自动花 1 储能，把那行再移 1 格。"
 effect_handler_id = "instant_power"
 priority = "蓄放"
 implemented = true

@@ -10,7 +10,7 @@ handler = "serial"
 amount = 6
 target = 0
 timing = "persistent"
-note = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待兑现奖励可叠加并跨回合保留，含启用当次"
+note = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待生效奖励可叠加并，含启用当次"
 args = {"bonus": 6}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_yt187")
 id = "w027"
 word = "连载"
 glyphs = Array[String](["连", "载"])
-description = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待兑现奖励可叠加并跨回合保留，含启用当次"
+description = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待生效奖励可叠加并，含启用当次"
 effects = Array[ExtResource("1_0a57h")]([SubResource("Resource_12llc")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待兑现奖励可叠加并跨回合保留，含启用当次"
+effect_summary = "本场每累计 3 次有效多字词（允许重复），下一次攻击每段 +6；待生效奖励可叠加并，含启用当次"
 effect_handler_id = "serial"
 timing = "persistent"
 implementation_delta = "已按 2026-10-14 确认方案更新"

@@ -18,18 +18,18 @@ handler = "counter"
 amount = 1
 target = 0
 timing = "delayed"
-note = "获得1层反击；所有敌人行动后，以剩余临挡+3反击一次，可叠加。"
+note = "获得1层反击；所有敌人行动后，以剩余临挡+3反击一次。"
 
 [resource]
 script = ExtResource("2_word")
 id = "extra_fangfan"
 word = "防反"
 glyphs = Array[String](["防", "反"])
-description = "获得6临时格挡、1层反击。本回合所有敌人行动后，以剩余临时格挡+3反击首个存活敌人一次；反击层数可叠加。"
+description = "获得6临时格挡、1层反击。本回合所有敌人行动后，以剩余临时格挡+3反击首个存活敌人一次。"
 effects = Array[ExtResource("1_effect")]([SubResource("Block"), SubResource("Counter")])
 group = "防反"
 design_stage = "2026-10-13 按词义补全"
-effect_summary = "获得6临时格挡、1层反击。本回合所有敌人行动后，以剩余临时格挡+3反击首个存活敌人一次；反击层数可叠加。"
+effect_summary = "获得6临时格挡、1层反击。本回合所有敌人行动后，以剩余临时格挡+3反击首个存活敌人一次。"
 effect_handler_id = "block_temp"
 priority = "防反"
 implemented = true

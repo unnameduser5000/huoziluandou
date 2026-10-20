@@ -10,18 +10,18 @@ handler = "apply_status_self"
 amount = 1
 target = 3
 status_id = "next_double"
-note = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；跨回合保留。"
+note = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；。"
 
 [resource]
 script = ExtResource("2_3eydw")
 id = "w024"
 word = "超强"
 glyphs = Array[String](["超", "强"])
-description = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；跨回合保留。"
+description = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；。"
 effects = Array[ExtResource("1_pg3bq")]([SubResource("Resource_33ir2")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；跨回合保留。"
+effect_summary = "下一次攻击的各段基础伤害与力量、热力加成翻倍；蓄力、连载、过火追加伤害不随之翻倍。即使被护盾完全挡住也消耗；。"
 effect_handler_id = "apply_status_self"
 p25_implemented = true
 implementation_delta = "—"

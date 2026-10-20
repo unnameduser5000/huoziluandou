@@ -10,7 +10,7 @@ handler = "repeat_zero"
 amount = 1
 target = 0
 timing = "next_word"
-note = "本回合下一次成功打出词语后，将整词各字的临时复制分别放入随机空格；用后消失，不继承实体强化，空位不足时放入能容纳的部分"
+note = "本回合下一个组词后，把该词每个字的临时字放进随机空格；用后消失、不继承强化。"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_1t3k2")
 id = "w028"
 word = "反复"
 glyphs = Array[String](["反", "复"])
-description = "本回合下一次成功打出词语后，将整词各字的临时复制分别放入随机空格；用后消失，不继承实体强化，空位不足时放入能容纳的部分"
+description = "本回合下一个组词后，把该词每个字的临时字放进随机空格；用后消失、不继承强化。"
 effects = Array[ExtResource("1_1loh7")]([SubResource("Resource_t21ee")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本回合下一次成功打出词语后，将整词各字的临时复制分别放入随机空格；用后消失，不继承实体强化，空位不足时放入能容纳的部分"
+effect_summary = "本回合下一个组词后，把该词每个字的临时字放进随机空格；用后消失、不继承强化。"
 effect_handler_id = "repeat_zero"
 timing = "next_word"
 implementation_delta = "已按 2026-10-14 确认方案更新"

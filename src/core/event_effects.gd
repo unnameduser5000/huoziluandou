@@ -237,6 +237,7 @@ static func _execute(effects: Array, removal_counts: Array, selected: Array, rng
 	# Random finds are revealed before pickup. Costs and other option effects settle once.
 	# Explicitly named relic options retain their stated pickup effect.
 	var relic_offers: Array = []
+	var notes: Array = []          # 结算后的旁白（选项不提前剧透，选完才告知）
 	var selected_index := 0
 	for index in effects.size():
 		var effect: Dictionary = effects[index]
@@ -323,7 +324,12 @@ static func _execute(effects: Array, removal_counts: Array, selected: Array, rng
 				var relic_pool := str(effect.get("pool", "normal"))
 				var chance := clampf(float(effect.get("chance", 1.0)), 0.0, 1.0)
 				if chance < 1.0 and rng.randf() >= chance:
-					if effect.has("fallback_gold"): GameState.add_gold(int(effect.fallback_gold))
+					var fallback := int(effect.get("fallback_gold", 0))
+					if fallback > 0:
+						GameState.add_gold(fallback)
+						notes.append("开椟（未得遗物，返还 %d 铜钱）" % fallback)
+					else:
+						notes.append("开椟（空手而归）")
 					continue
 				if relic_id == "random":
 					var choices: Array = Relics.roll_choices(GameState.relics + reserved + relic_offers, rng, 1, relic_pool)
@@ -332,7 +338,10 @@ static func _execute(effects: Array, removal_counts: Array, selected: Array, rng
 						relic_offers.append(relic_id)
 						continue
 				if relic_id.is_empty() or not GameState.add_relic(relic_id):
-					if effect.has("fallback_gold"): GameState.add_gold(int(effect.fallback_gold))
+					var fallback2 := int(effect.get("fallback_gold", 0))
+					if fallback2 > 0:
+						GameState.add_gold(fallback2)
+						notes.append("开椟（未得遗物，返还 %d 铜钱）" % fallback2)
 					else: return {"ok": false, "reason": "没有可获得的遗物"}
 				else:
 					if Relics.needs_bind(relic_id):
@@ -351,7 +360,7 @@ static func _execute(effects: Array, removal_counts: Array, selected: Array, rng
 					if character == null or not GameState.remove_character_id(character.id):
 						return {"ok": false, "reason": "所选字已不存在"}
 					selected_index += 1
-	return {"ok": true, "pending": {}, "relic_offers": relic_offers}
+	return {"ok": true, "pending": {}, "relic_offers": relic_offers, "notes": notes}
 
 
 static func debt_amount() -> int:

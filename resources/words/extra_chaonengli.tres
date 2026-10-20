@@ -10,7 +10,7 @@ handler = "double_next_ability"
 amount = 0
 target = 0
 timing = "next_word"
-note = "本回合下列能力中，首项可兑现收益翻倍，消耗与降温量不重复：加速、流转、能力、连载、蓄能、蓄热、分利、过热、火热、电流过载、电能、心力、护甲。"
+note = "本回合所有能力收益结算两遍；消耗（如热力、蓄力清空资源）不翻倍。"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_x46cw")
 id = "extra_chaonengli"
 word = "超能力"
 glyphs = Array[String](["超", "能", "力"])
-description = "本回合下列能力中，首项可兑现收益翻倍，消耗与降温量不重复：加速、流转、能力、连载、蓄能、蓄热、分利、过热、火热、电流过载、电能、心力、护甲。"
+description = "本回合所有能力收益结算两遍；消耗（如热力、蓄力清空资源）不翻倍。"
 effects = Array[ExtResource("1_8a7b0")]([SubResource("Resource_264hq")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "本回合下列能力中，首项可兑现收益翻倍，消耗与降温量不重复：加速、流转、能力、连载、蓄能、蓄热、分利、过热、火热、电流过载、电能、心力、护甲。"
+effect_summary = "本回合所有能力收益结算两遍；消耗（如热力、蓄力清空资源）不翻倍。"
 effect_handler_id = "double_next_ability"
 priority = "蓄放"
 implemented = true

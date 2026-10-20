@@ -7,18 +7,18 @@
 script = ExtResource("1_1dakw")
 kind = 29
 handler = "replay_last_attack"
-note = "重演上一个即时攻击词的效果"
+note = "再结算一次上一个攻击词的效果（费用照付）"
 
 [resource]
 script = ExtResource("2_w7xwn")
 id = "w015"
 word = "连击"
 glyphs = Array[String](["连", "击"])
-description = "重演上一个即时攻击词的效果"
+description = "再结算一次上一个攻击词的效果（费用照付）"
 effects = Array[ExtResource("1_1dakw")]([SubResource("Resource_1farn")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "重演上一个即时攻击词的效果"
+effect_summary = "再结算一次上一个攻击词的效果（费用照付）"
 effect_handler_id = "replay_last_attack"
 p25_implemented = true
 implementation_delta = "P25主要重放攻击基础处理，不能完整复制附带效果"

@@ -10,18 +10,18 @@ handler = "suspend_three"
 amount = 3
 target = 0
 timing = "persistent"
-note = "选择施词以外3枚不同的非固定字，本回合暂时移出；下回合原格优先返回，原格被占则找空格，满盘时等待空位。"
+note = "选择本词以外 3 枚未固定字，本回合暂时移出；下回合优先回到原格（被占则找空格，满盘时等待）。"
 
 [resource]
 script = ExtResource("2_word")
 id = "extra_chonglian"
 word = "重连"
 glyphs = Array[String](["重", "连"])
-description = "选择施词以外3枚不同的非固定字，本回合暂时移出；下回合原格优先返回，原格被占则找空格，满盘时等待空位。"
+description = "选择本词以外 3 枚未固定字，本回合暂时移出；下回合优先回到原格（被占则找空格，满盘时等待）。"
 effects = Array[ExtResource("1_effect")]([SubResource("Effect")])
 group = "连携"
 design_stage = "2026-10-14 重设计"
-effect_summary = "选择施词以外3枚不同的非固定字，本回合暂时移出；下回合原格优先返回，原格被占则找空格，满盘时等待空位。"
+effect_summary = "选择本词以外 3 枚未固定字，本回合暂时移出；下回合优先回到原格（被占则找空格，满盘时等待）。"
 effect_handler_id = "suspend_three"
 timing = "delayed"
 priority = "连携"

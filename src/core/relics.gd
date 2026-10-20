@@ -19,7 +19,7 @@ const DEFS := {
 	"wheel": ["转轮架", "每回合按 上、下、左、右 轮流让全盘下落", false],
 	"powerbank": ["蓄电瓶", "每场开局获得 4 储能", false],
 	"fireman": ["火种", "拾取时获得 4 枚【火】", false],
-	"fertilizer": ["蔓生墨", "选一枚字：本场它变为临时字，每回合结束向四邻空格繁殖临时复制", true],
+	"fertilizer": ["蔓生墨", "选一枚字：本场它变为临时字，每回合结束向四邻空格繁殖临时字", true],
 	"skyfire": ["天火", "打出【流火】时，额外对敌人造成 50 点伤害", false],
 	"blitz": ["急就章", "每场第一回合结束后，敌人跳过这一次行动", false],
 	"egg": ["字种", "每赢 4 场战斗，获得 1 枚字", false],
@@ -157,7 +157,7 @@ static func opening_draw(rules: BattleRules, relics: Array) -> int:
 	return rules.opening_draw + (BattleBalance.i("press_draw", 4) if relics.has("press") else 0)
 
 
-## 洗袋之前：蔓生墨母本换成本场临时副本；压字石记下绑定的实体。
+## 洗袋之前：蔓生墨母本换成本场临时字；压字石记下绑定的实体。
 static func prepare_deck(b: BattleState) -> void:
 	if b.relics.has("slab"):
 		var inst := _bag_inst(b, int(b.relic_binds.get("slab", -1)))
@@ -167,7 +167,7 @@ static func prepare_deck(b: BattleState) -> void:
 	if b.relics.has("fertilizer"):
 		var src := _bag_inst(b, int(b.relic_binds.get("fertilizer", -1)))
 		if src != null and src.uid != b.slab_uid:
-			# 永久实体留在 GameState.deck，本场只用它的临时副本，打完不会丢字
+			# 永久实体留在 GameState.deck，本场只用它的临时字，打完不会丢字
 			var copy := src.clone()
 			copy.temporary = true
 			copy.temporary_uses = 0
@@ -179,7 +179,7 @@ static func prepare_deck(b: BattleState) -> void:
 		var candidates: Array = b.bag.filter(func(c): return c.is_player_owned() and not c.temporary and c.uid != b.slab_uid)
 		if not candidates.is_empty():
 			var picked: CharInstance = candidates[b.rng.randi_range(0, candidates.size() - 1)]
-			# 同样保留永久实体，只用本场的临时副本
+			# 同样保留永久实体，只用本场的临时字
 			var fruit := picked.clone()
 			fruit.temporary = true
 			fruit.temporary_uses = 0
@@ -356,7 +356,7 @@ static func on_cards_consumed(b: BattleState, consumed: Array) -> void:
 			b._log("补字鬼手：补 %d 字（本场还剩 %d 次）" % [n, b.magic_hand_left])
 
 
-## 回合结束（敌人行动前）：繁殖字向四邻空格生成临时复制；新生的下回合才繁殖
+## 回合结束（敌人行动前）：繁殖字向四邻空格生成临时字；新生的下回合才繁殖
 static func breed(b: BattleState) -> void:
 	if b.breeders.is_empty():
 		return

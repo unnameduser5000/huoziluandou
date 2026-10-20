@@ -344,7 +344,7 @@ static func word_effects(word: String) -> Array:
 		"充电": return [e("energy", 3)]
 		"充能": return [e("energy", 1), e("draw_random", 2)]
 		"放电": return [e("energy_discharge", 4, T.ENEMY, "", "清空全部储能，每点造成一段 4 伤电击", {})]
-		"充放电": return [e("energy_discharge", 4, T.ENEMY, "", "清空全部储能，每点 4 伤并随机补 1 字", {"draw_per": 1})]
+		"充放电": return [e("energy_discharge", 4, T.ENEMY, "", "消耗全部储能：每点造成 4 伤；每命中一段，下回合储能 +2", {"refund": 2})]
 		# 热暴
 		"过载": return [e("draw_random", 6), e("heat", 3)]
 		"超载": return [e("apply_status_self", 1, T.SELF, "next_extra"), e("heat", 3)]
@@ -355,7 +355,7 @@ static func word_effects(word: String) -> Array:
 		"热流": return [e("heat_to_damage_flow", 2, T.ENEMY, "", "按本回合补字数最多降 4 热，每实际降 1 热造成 2 伤", {"max": 4})]
 		"火爆": return [e("heat_burst", 8, T.ENEMY, "", "消耗全部热度，造成 8 + 4×热度伤害", {"per": 4})]
 		"爆破": return [e("destroy_2x2", 4, T.BOARD_2X2, "", "摧毁 2×2 区域（含自己），每摧毁 1 字造成 4 伤", {}, -1, "immediate", true)]
-		"加热": return [e("heat", 3)]
+		"加热": return [e("heat", 5)]
 		"急冷": return [e("heat_clear", 0), e("draw_penalty_next", 1)]
 		"电流过载": return [e("ability_electric_overload", 3, -1, "", "本战每次溢热：生成灼热热字、储能 +1、对敌 3 伤", {}, -1, "persistent")]
 		"超速": return [e("ability_double_draw_next", 4, -1, "", "本回合下一次补字翻倍，最多额外 4 字；每额外 1 字升温 1", {}, -1, "next_word")]

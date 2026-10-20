@@ -7,19 +7,19 @@
 script = ExtResource("1_c3oxc")
 kind = 14
 handler = "heat"
-amount = 3
-note = "热度 +3"
+amount = 5
+note = "热度 +5"
 
 [resource]
 script = ExtResource("2_gvkyv")
 id = "w090"
 word = "加热"
 glyphs = Array[String](["加", "热"])
-description = "热度 +3"
+description = "热度 +5"
 effects = Array[ExtResource("1_c3oxc")]([SubResource("Resource_16f16")])
 group = "热暴"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "热度 +3"
+effect_summary = "热度 +5"
 effect_handler_id = "heat"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P3·补全词效"

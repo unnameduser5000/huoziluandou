@@ -10,18 +10,18 @@ handler = "linger_chance"
 amount = 50
 target = 0
 timing = "persistent"
-note = "本回合后续打出的每个字有 50% 概率留在原位（原实体保留，不叠加）"
+note = "本回合后续每枚出字有 25% 概率留在原位（保留原字）；最多叠到 50%（2 层）"
 
 [resource]
 script = ExtResource("2_word")
 id = "extra_liulian"
 word = "流连"
 glyphs = Array[String](["流", "连"])
-description = "本回合后续打出的每个字有 50% 概率留在原位（原实体保留，不叠加）"
+description = "本回合后续每枚出字有 25% 概率留在原位（保留原字）；最多叠到 50%（2 层）"
 effects = Array[ExtResource("1_effect")]([SubResource("Effect")])
 group = "流转"
 design_stage = "2026-10-14 重设计"
-effect_summary = "本回合后续打出的每个字有 50% 概率留在原位（原实体保留，不叠加）"
+effect_summary = "本回合后续每枚出字有 25% 概率留在原位（保留原字）；最多叠到 50%（2 层）"
 effect_handler_id = "linger_chance"
 timing = "persistent"
 priority = "流转"

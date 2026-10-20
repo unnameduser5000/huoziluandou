@@ -8,18 +8,18 @@ script = ExtResource("1_j0o82")
 kind = 6
 handler = "ignite"
 amount = 3
-note = "敌方接下来 2 次行动各受 3+施放时热度 伤"
+note = "使目标获得 2 层灼烧：每层每回合失去「当前热度×2」生命，结算后掉 1 层。"
 
 [resource]
 script = ExtResource("2_umeww")
 id = "w093"
 word = "放火"
 glyphs = Array[String](["放", "火"])
-description = "敌方接下来 2 次行动各受 3+施放时热度 伤"
+description = "使目标获得 2 层灼烧：每层每回合失去「当前热度×2」生命，结算后掉 1 层。"
 effects = Array[ExtResource("1_j0o82")]([SubResource("Resource_hfm88")])
 group = "热暴"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "敌方接下来 2 次行动各受 3+施放时热度 伤"
+effect_summary = "使目标获得 2 层灼烧：每层每回合失去「当前热度×2」生命，结算后掉 1 层。"
 effect_handler_id = "ignite"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P3·补全词效"

@@ -10,18 +10,18 @@ handler = "flow_speed"
 amount = 2
 target = 11
 timing = "persistent"
-note = "选择一行，本回合该行出词实际腾空的原格从字袋补新字，成功补字才扣1词预算，共2词；重复施放叠加预算。"
+note = "选择一行：本回合该行组词腾出的格子会从字袋补字，可补 2 次（补成功才计次）。"
 
 [resource]
 script = ExtResource("2_vywej")
 id = "extra_liusu"
 word = "流速"
 glyphs = Array[String](["流", "速"])
-description = "选择一行，本回合该行出词实际腾空的原格从字袋补新字，成功补字才扣1词预算，共2词；重复施放叠加预算。"
+description = "选择一行：本回合该行组词腾出的格子会从字袋补字，可补 2 次（补成功才计次）。"
 effects = Array[ExtResource("1_ac012")]([SubResource("Resource_m4ui3")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "选择一行，本回合该行出词实际腾空的原格从字袋补新字，成功补字才扣1词预算，共2词；重复施放叠加预算。"
+effect_summary = "选择一行：本回合该行组词腾出的格子会从字袋补字，可补 2 次（补成功才计次）。"
 effect_handler_id = "flow_speed"
 requires_target = 11
 priority = "流转"

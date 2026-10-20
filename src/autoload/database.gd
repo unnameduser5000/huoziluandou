@@ -56,6 +56,7 @@ func reload() -> void:
 	for res in _load_dir(WORD_DIR, "WordData"):
 		for effect in res.effects:
 			effect.kind = effect.semantic_kind()
+		# 玩家可见说明的唯一来源：BattleText.WORDS（.tres 与 WordDescriptions 的 TEXT 字段都作废）
 		res.description = BattleText.word(res)
 		res.effect_summary = res.description
 		words[res.id] = res

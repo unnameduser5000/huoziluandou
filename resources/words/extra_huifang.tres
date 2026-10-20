@@ -7,18 +7,18 @@
 script = ExtResource("1_2ypxa")
 kind = 29
 handler = "replay_word"
-note = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原实体放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
+note = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原字放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
 
 [resource]
 script = ExtResource("2_0wco8")
 id = "extra_huifang"
 word = "回放"
 glyphs = Array[String](["回", "放"])
-description = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原实体放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
+description = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原字放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
 effects = Array[ExtResource("1_2ypxa")]([SubResource("Resource_n044w")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原实体放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
+effect_summary = "将上一个词实际消耗、且仍在字袋或弃字堆中的己方原字放回盘面；原格优先，被占则找空格。临时字、敌字不返还。"
 effect_handler_id = "replay_word"
 priority = "流转"
 implemented = true

@@ -7,18 +7,18 @@
 script = ExtResource("1_rbtns")
 kind = 29
 handler = "recover_to_bag"
-note = "选1枚非固定己方原实体放到袋顶，再从弃字堆选1枚原实体放入它的原格。"
+note = "选1枚未固定己方原字放到袋顶，再从弃字堆选1枚原字放入它的原格。"
 
 [resource]
 script = ExtResource("2_qjart")
 id = "extra_shouhui"
 word = "收回"
 glyphs = Array[String](["收", "回"])
-description = "选1枚非固定己方原实体放到袋顶，再从弃字堆选1枚原实体放入它的原格。"
+description = "选1枚未固定己方原字放到袋顶，再从弃字堆选1枚原字放入它的原格。"
 effects = Array[ExtResource("1_rbtns")]([SubResource("Resource_k8qbn")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "选1枚非固定己方原实体放到袋顶，再从弃字堆选1枚原实体放入它的原格。"
+effect_summary = "选1枚未固定己方原字放到袋顶，再从弃字堆选1枚原字放入它的原格。"
 effect_handler_id = "recover_to_bag"
 priority = "流转"
 implemented = true

@@ -19,10 +19,13 @@ from __future__ import annotations
 
 import argparse
 import os
+import queue
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -68,6 +71,9 @@ EVENT = [
     "room_event_ui_test",
 ]
 
+# 引用了已删除接口 / 已写死旧实现的测试：默认不跑，显式点名才跑（会提示原因）。
+STALE = {}
+
 ECONOMY = [
     "economy_gild_test",
     "shop_actions_test",
@@ -112,21 +118,9 @@ MAP = [
     "expedition_growth_test",
     "expedition_map_view_test",
     "expedition_act_exit_test",
-    "expedition_style_lab_test",
-    "garden_test",
-    "garden_site_test",
-    "garden_route_planning_test",
-    "garden_map_generation_test",
-    "garden_compact_test",
-    "garden_compact_run_test",
-    "garden_compact_passages_test",
-    "garden_compact_furnishing_test",
     "node_route_test",
     "node_route_generation_test",
     "room_route_test",
-    "room_map_view_test",
-    "random_garden_test",
-    "authored_garden_test",
 ]
 
 # 重测试：成套渲染、逐尺寸布局、逐动画检查。默认不跑。
@@ -169,7 +163,11 @@ HEAVY_LAYOUT = [
     "ui_consistency_test",
 ]
 
+# 只改文案时跑这一组（约 6 秒）：可读性、术语链接、说明与 WORDS 同步
+COPY = ["player_copy_test", "effect_help_test"]
+
 GROUPS = {
+    "copy": COPY,
     "core": CORE,
     "relic": RELIC,
     "event": EVENT,
@@ -192,13 +190,16 @@ RULES = [
     ("src/core/combatant.gd", ["core"]),
     ("src/core/battle_ops.gd", ["core"]),
     ("src/core/battle_balance.gd", ["core"]),
-    ("resources/characters/", ["core"]),
-    ("resources/words/", ["core"]),
+    ("resources/characters/", ["copy"]),
+    ("resources/words/", ["copy"]),
+    ("src/data/battle_text.gd", ["copy"]),
+    ("src/data/word_descriptions.gd", ["copy"]),
+    ("src/data/event_catalog.gd", ["copy"]),
     ("resources/statuses/", ["core"]),
     ("resources/pollutions/", ["core"]),
     ("resources/enemies/", ["core", "map"]),
     ("data/balance/", ["core", "relic"]),
-    ("src/data/event_", ["event"]),
+    ("src/data/event_effects.gd", ["event", "copy"]),
     ("src/screens/event_screen.gd", ["event"]),
     ("src/screens/shop_screen.gd", ["economy"]),
     ("src/screens/reward_screen.gd", ["economy"]),
@@ -221,12 +222,10 @@ DEFAULT_GROUPS = ["core"]
 # 每次改动后请顺手复核这张表，修好了就把对应行删掉。
 KNOWN_RED = {
     "effect_contract_test": "基线红：效果契约（3 条）",
-    "player_copy_test": "基线红：复制/分制（2 条）",
     "recent_log_test": "基线红：战报布局（4 条）",
     "intent_design_test": "基线红：意图文案（6 条）",
     "battle_ui_test": "基线红：AchievementArt 未注册导致 1 条",
     "relic_expansion_test": "基线红：旧 PNG 字节一致（1 条）",
-    "event_reward_audit_test": "基线红：致死事件结算（1 条）",
     "expedition_relic_loot_test": "基线红：遗物长说明布局（2 条）",
     "classic_relic_test": "基线红且随机波动（2~4 条）",
     "debug_relic_test": "基线红：遗物自检（26 条）",
@@ -238,6 +237,8 @@ KNOWN_RED = {
 PASS_RE = re.compile(r"PASS=(\d+)\s+FAIL=(\d+)")
 CHECKS_RE = re.compile(r"CHECKS=(\d+)\s+FAIL=(\d+)")
 LOWER_RE = re.compile(r"checks=(\d+)\s+failures=(\[([^\]]*)\]|(\d+))")
+FATAL_RE = re.compile(r"^(?:SCRIPT ERROR:|ERROR: Failed to (?:load script|instantiate|open))", re.MULTILINE)
+LOG_DIR = ROOT / "shots" / "test-runs" / str(os.getpid())
 
 
 def find_godot(explicit: str | None) -> Path:
@@ -251,8 +252,8 @@ def find_godot(explicit: str | None) -> Path:
         if found:
             candidates.append(found)
     candidates += [
-        r"D:/Apps/Godot/Godot_v4.7.2-stable_win64_console.exe",
         r"D:/Apps/Godot/Godot_v4.7.2-stable_win64.exe",
+        r"D:/Apps/Godot/Godot_v4.7.2-stable_win64_console.exe",
         r"C:/Program Files/Godot/Godot_v4.7.2-stable_win64.exe",
     ]
     for c in candidates:
@@ -328,48 +329,147 @@ def resolve_targets(args) -> list[str]:
     for name in args.tests:
         if name not in targets:
             targets.append(name)
+    for name in list(targets):
+        if name in STALE:
+            print(f"[stale] {name}：{STALE[name]}")
     return targets
 
 
-def run_one(godot: Path, name: str, timeout: int) -> tuple[str, int, int, float, str]:
+def stop_process_tree(proc: subprocess.Popen) -> None:
+    """Stop only this invocation and its children, including the Windows launcher."""
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=5, creationflags=subprocess.CREATE_NO_WINDOW, check=False,
+        )
+    else:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    if proc.poll() is None:
+        proc.kill()
+    proc.wait(timeout=5)
+
+
+def capture_process(cmd: list[str], cwd: Path, timeout: float) -> tuple[int, str, str]:
+    """Read diagnostics as they arrive instead of waiting for a broken scene to quit."""
+    options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session": True}
+    proc = subprocess.Popen(
+        cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, encoding="utf-8", errors="replace", bufsize=1, **options,
+    )
+    pending: queue.Queue = queue.Queue()
+    output: list[str] = []
+    stopped = ""
+    deadline = time.monotonic() + timeout
+
+    def read_lines() -> None:
+        try:
+            for line in proc.stdout:
+                pending.put(line)
+        finally:
+            pending.put(None)
+
+    reader = threading.Thread(target=read_lines, daemon=True)
+    reader.start()
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                stopped = "TIMEOUT"
+                break
+            try:
+                line = pending.get(timeout=min(.1, remaining))
+            except queue.Empty:
+                continue
+            if line is None:
+                break
+            output.append(line)
+            if FATAL_RE.search(line):
+                stopped = "SCRIPT_ERROR"
+                break
+        if stopped:
+            stop_process_tree(proc)
+        else:
+            try:
+                proc.wait(timeout=max(.01, deadline-time.monotonic()))
+            except subprocess.TimeoutExpired:
+                stopped = "TIMEOUT"
+                stop_process_tree(proc)
+    finally:
+        if proc.poll() is None:
+            stop_process_tree(proc)
+        reader.join(timeout=1)
+        while True:
+            try:
+                line = pending.get_nowait()
+            except queue.Empty:
+                break
+            if line is not None:
+                output.append(line)
+        if not reader.is_alive():
+            proc.stdout.close()
+    return proc.returncode, "".join(output), stopped
+
+
+def summarize_output(returncode: int, out: str, stopped: str) -> tuple[int, int, str]:
+    passed = failed = 0
+    reported = False
+    for line in reversed(out.splitlines()):
+        match = PASS_RE.search(line)
+        if match:
+            passed, failed = map(int, match.groups())
+            reported = True
+            break
+        match = CHECKS_RE.search(line)
+        if match:
+            total, failed = map(int, match.groups())
+            passed = total - failed
+            reported = True
+            break
+        match = LOWER_RE.search(line)
+        if match:
+            names = match.group(3) or ""
+            failed = len([x for x in names.split(",") if x.strip()]) if names.strip() else int(match.group(4) or 0)
+            passed = int(match.group(1)) - failed
+            reported = True
+            break
+    if not reported:
+        passed, failed = out.count("✓"), out.count("✗")
+        reported = passed + failed > 0
+    if stopped == "TIMEOUT":
+        return passed, failed, "TIMEOUT"
+    fatal = FATAL_RE.search(out)
+    if stopped == "SCRIPT_ERROR" or fatal:
+        detail = out[fatal.start():].partition("\n")[0] if fatal else "脚本执行中断"
+        return passed, failed, "ERROR " + detail
+    if not reported:
+        return 0, 0, f"ERROR 未输出测试结果（退出码 {returncode}）"
+    if returncode == 0 and failed == 0:
+        return passed, failed, "PASS"
+    errors = [line.strip() for line in out.splitlines() if line.startswith("ERROR:")]
+    return passed, failed, "FAIL " + (" | ".join(errors[:3]) or f"退出码 {returncode}")
+
+
+def run_one(godot: Path, name: str, timeout: float) -> tuple[str, int, int, float, str]:
     scene = f"res://tests/{name}.tscn"
     if not (TESTS / f"{name}.tscn").is_file():
         return name, 0, 0, 0.0, "MISSING"
     started = time.monotonic()
-    cmd = [str(godot), "--headless", "--path", str(ROOT), scene]
-    try:
-        proc = subprocess.run(cmd, capture_output=True, timeout=timeout)
-        out = (proc.stdout + proc.stderr).decode("utf-8", "replace")
-        elapsed = time.monotonic() - started
-        passed = failed = 0
-        for line in out.splitlines()[::-1]:
-            m = PASS_RE.search(line) or CHECKS_RE.search(line)
-            if m:
-                passed, failed = int(m.group(1)), int(m.group(2))
-                break
-            m2 = LOWER_RE.search(line)
-            if m2:
-                total = int(m2.group(1))
-                names = m2.group(3) or ""
-                bad = len([x for x in names.split(",") if x.strip()]) if names.strip() else int(m2.group(4) or 0)
-                failed = bad
-                passed = total - bad
-                break
-        if passed == 0 and failed == 0:
-            ticks = out.count("✓")
-            crosses = out.count("✗")
-            if ticks or crosses:
-                passed, failed = ticks, crosses
-        status = "PASS" if proc.returncode == 0 and failed == 0 else "FAIL"
-        if passed == 0 and failed == 0:
-            status = "PASS" if proc.returncode == 0 else "FAIL"
-        if status == "FAIL":
-            fails = [l.strip() for l in out.splitlines() if l.startswith("ERROR:") and "Failed to load script" not in l]
-            detail = " | ".join(fails[:3])
-            return name, passed, failed, elapsed, f"{status} {detail}"
-        return name, passed, failed, elapsed, status
-    except subprocess.TimeoutExpired:
-        return name, 0, 0, time.monotonic() - started, f"TIMEOUT(>{timeout}s)"
+    cmd = [str(godot), "--headless", "--path", str(ROOT), "--max-fps", "240", scene]
+    returncode, out, stopped = capture_process(cmd, ROOT, timeout)
+    elapsed = time.monotonic() - started
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_path = LOG_DIR / f"{name}.log"
+    log_path.write_text(out, encoding="utf-8")
+    passed, failed, status = summarize_output(returncode, out, stopped)
+    if status != "PASS":
+        if status == "TIMEOUT":
+            status += f" 超过 {timeout:g}s，已回收本次进程树"
+        status += f"；日志：{log_path}"
+    return name, passed, failed, elapsed, status
 
 
 def main() -> int:
@@ -394,6 +494,10 @@ def main() -> int:
             for name in ids:
                 marker = "  " if (TESTS / f"{name}.tscn").is_file() else "✗ "
                 print(f"  {marker}{name}")
+        if STALE:
+            print("\n陈旧测试（默认不跑）：")
+            for name, why in STALE.items():
+                print(f"  {name} —— {why}")
         return 0
 
     targets = resolve_targets(args)
@@ -411,14 +515,19 @@ def main() -> int:
     failures: list[str] = []
     known_red: list[str] = []
     total_time = 0.0
+    started = time.monotonic()
+    completed = 0
     skipped: list[str] = []
     for name in targets:
-        if total_time > args.budget:
+        remaining = args.budget - (time.monotonic() - started)
+        if remaining <= 0:
             skipped = targets[targets.index(name):]
             break
-        limit = args.heavy_timeout if name in heavy else args.timeout
+        limit = min(args.heavy_timeout if name in heavy else args.timeout, remaining)
+        print(f"[run] {name}（最多 {limit:g}s）", flush=True)
         tname, passed, failed, elapsed, status = run_one(godot, name, limit)
         total_time += elapsed
+        completed += 1
         kind = status.split(" ")[0]
         label = "KNOWN-RED" if (kind == "FAIL" and tname in KNOWN_RED and not args.strict) else kind
         print(f"{tname:<34} {label:<8} {passed:>4}/{passed + failed:<4} {elapsed:>6.1f}s")
@@ -435,16 +544,19 @@ def main() -> int:
     print("-" * 72)
     if skipped:
         print(f"[budget] 超时跳过 {len(skipped)} 个：" + ", ".join(skipped[:6]) + ("…" if len(skipped) > 6 else ""))
-    print(f"完成 {len(targets) - len(skipped)} 个，失败 {len(failures)} 个，已知红灯 {len(known_red)} 个，用时 {total_time:.1f}s")
+    print(f"完成 {completed} 个，失败 {len(failures)} 个，已知红灯 {len(known_red)} 个，用时 {total_time:.1f}s")
+    print(f"日志：{LOG_DIR}")
     if known_red:
         print("已知红灯（基线如此，--strict 可当失败）：" + ", ".join(known_red))
     if failures:
         print("新增失败：" + ", ".join(failures))
         return 1
+    if skipped:
+        return 2
     return 0
 
 
 if __name__ == "__main__":
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
     raise SystemExit(main())

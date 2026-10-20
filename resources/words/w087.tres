@@ -7,18 +7,18 @@
 script = ExtResource("1_pm3hd")
 kind = 29
 handler = "recast_three"
-note = "选择施词以外3枚不同的非固定字，替换为随机临时字；随机字不一定在牌组里，用后移除。"
+note = "选择本词以外 3 枚未固定字，换成随机临时字（不限于你带进来的字）；用后消失。"
 
 [resource]
 script = ExtResource("2_s0jvi")
 id = "w087"
 word = "再铸"
 glyphs = Array[String](["再", "铸"])
-description = "选择施词以外3枚不同的非固定字，替换为随机临时字；随机字不一定在牌组里，用后移除。"
+description = "选择本词以外 3 枚未固定字，换成随机临时字（不限于你带进来的字）；用后消失。"
 effects = Array[ExtResource("1_pm3hd")]([SubResource("Resource_sqf2g")])
 group = "淬炼"
 design_stage = "P23初稿；未完成分组复审"
-effect_summary = "选择施词以外3枚不同的非固定字，替换为随机临时字；随机字不一定在牌组里，用后移除。"
+effect_summary = "选择本词以外 3 枚未固定字，换成随机临时字（不限于你带进来的字）；用后消失。"
 effect_handler_id = "recast_three"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P4·待复审"

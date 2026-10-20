@@ -7,18 +7,18 @@
 script = ExtResource("1_0wxsv")
 kind = 29
 handler = "heart_link"
-note = "将双方生命上限、当前生命分别取平均，向下取整；你的生命上限改变会跨战保留到本局结束。"
+note = "将双方生命上限、当前生命分别取平均；你的生命上限改变会跨战保留到本局结束。"
 
 [resource]
 script = ExtResource("2_vhd6s")
 id = "extra_xinlianxin"
 word = "心连心"
 glyphs = Array[String](["心", "连", "心"])
-description = "将双方生命上限、当前生命分别取平均，向下取整；你的生命上限改变会跨战保留到本局结束。"
+description = "将双方生命上限、当前生命分别取平均；你的生命上限改变会跨战保留到本局结束。"
 effects = Array[ExtResource("1_0wxsv")]([SubResource("Resource_562a6")])
 group = "空间"
 design_stage = "设计负责人新增"
-effect_summary = "将双方生命上限、当前生命分别取平均，向下取整；你的生命上限改变会跨战保留到本局结束。"
+effect_summary = "将双方生命上限、当前生命分别取平均；你的生命上限改变会跨战保留到本局结束。"
 effect_handler_id = "heart_link"
 priority = "空间"
 implemented = true

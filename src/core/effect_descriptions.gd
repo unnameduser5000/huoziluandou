@@ -25,7 +25,7 @@ static func solo_text(inst: CharInstance, b: BattleState, path: Array = [], targ
 	if inst == null or inst.data == null:
 		return ""
 	if inst.word_only:
-		return "仅供组词的临时复制；单独打出只弃掉，不触发单字效果。"
+		return "仅供组词的临时字；单独打出只弃掉，不触发单字效果。"
 	var lines: Array[String] = [inst.describe()]
 	var current := _current(inst.data.solo_effects, b, path, target)
 	if not current.is_empty():
@@ -55,17 +55,17 @@ static func _active_triggers(effects: Array, b: BattleState, word: WordData = nu
 		if b.has_ability("next_free_word"):
 			lines.append("流利：本词可按任意位置选字，成功后消耗机会。")
 		if b.has_ability("next_gap"):
-			lines.append("超：成功出词后消耗本次跨空格机会，即使未跨格。")
+			lines.append("超：本次组词成功后会消耗跨空格机会，即使没跨格。")
 		if b.has_ability("next_draw_bonus"):
-			lines.append("过热待补：本词消耗材料后、结算词效前额外补%d字。" % b.ability_value("next_draw_bonus"))
+			lines.append("过热待补：本词打出后、结算效果前额外补%d字。" % b.ability_value("next_draw_bonus"))
 		if b.has_ability("repeat") and b.repeat_armed:
-			lines.append("重复：本词的即时效果额外结算一次，费用再付。")
+			lines.append("重复：本词的效果再结算一次，铜钱与储能照付。")
 		if b.player.status_stacks("next_extra") > 0:
-			lines.append("超载：本词的即时效果额外结算一次，费用再付。" if not EffectResolver.instant_effects(effects).is_empty() else "超载：本词没有可重演的即时效果，仍会消耗一次超载机会。")
+			lines.append("超载：本词的效果再结算一次，铜钱与储能照付。" if not EffectResolver.instant_effects(effects).is_empty() else "超载：本词没有可再结算的效果，仍会消耗一次超载机会。")
 		if word.length() >= BattleBalance.i("long_word_threshold", 3) and b.has_ability("next_compound"):
-			lines.append("复合：本词可选1枚实际消耗的字，在原格留临时副本。")
+			lines.append("复合：本词可选1枚实际消耗的字，在原格留临时字。")
 		if word.length() >= BattleBalance.i("long_word_threshold", 3) and b.has_ability("next_copy_layer"):
-			lines.append("超能：本词将按可留材料自动消耗储能，每付%d点保留1枚临时字。" % BattleBalance.i("copy_layer_cost", 1))
+			lines.append("超能：本词将按可用的字自动消耗储能，每付%d点保留1枚临时字。" % BattleBalance.i("copy_layer_cost", 1))
 	if effects.any(func(effect): return effect.is_attack()):
 		if b.player.status_stacks("next_bonus") > 0:
 			lines.append("热力待发：若本次发动攻击，每段+%d，计入超强翻倍，整次攻击后消耗。" % b.player.status_stacks("next_bonus"))
@@ -119,7 +119,7 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 	var heat := b.player.heat
 	match e.handler:
 		"gold_percent_damage":
-			return "当前%d铜钱，对应%d基础伤害（%d%%，向下取整），不消耗铜钱。" % [GameState.gold, floori(maxi(0, GameState.gold) * maxi(0, e.amount) / 100.0), e.amount]
+			return "当前%d铜钱，对应%d基础伤害（%d%%）。" % [GameState.gold, floori(maxi(0, GameState.gold) * maxi(0, e.amount) / 100.0), e.amount]
 		"repeat_last":
 			if b.last_played_glyphs.is_empty():
 				return "尚未打出任何字，无法复制；本次只弃掉【再】。"
@@ -129,16 +129,16 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 				return source + "，末字是【再】，不能复制自身；本次只弃掉。"
 			return source + "，末字【%s】；本次生成临时【%s】，有空格时才放入。" % [last, last]
 		"replay_last_attack":
-			return "将重演【%s】的即时效果。" % b.last_attack_word.word if b.last_attack_word != null and not b.last_attack_effects.is_empty() else "没有可重演的即时攻击词。"
+			return "再结算一次【%s】的效果。" % b.last_attack_word.word if b.last_attack_word != null and not b.last_attack_effects.is_empty() else "没有可再结算的攻击词。"
 		"replay_word":
 			var cards := replayable(b)
 			var source := "上一词【%s】" % b.last_played_word.word if b.last_played_word != null else "尚无上一词"
-			return source + "；可返回原实体：%s，实际放入数量以空格为限。" % _glyphs(cards) if not cards.is_empty() else source + "；没有仍可返回的原实体。"
+			return source + "；可返回原字：%s，实际放入数量以空格为限。" % _glyphs(cards) if not cards.is_empty() else source + "；没有仍可返回的原字。"
 		"recover_recent":
 			var cards := b.recoverable_consumed()
 			cards.reverse()
 			cards = cards.slice(0, maxi(0, e.amount))
-			return "可回袋顶：%s。" % _glyphs(cards) if not cards.is_empty() else "弃字堆没有本回合此前消耗的己方原实体。"
+			return "可回袋顶：%s。" % _glyphs(cards) if not cards.is_empty() else "弃字堆没有本回合此前消耗的己方原字。"
 		"refund_energy_half":
 			if b.last_energy_spent <= 0:
 				return "尚无实际储能消费，可退款0点。"
@@ -155,7 +155,7 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 				text += "对应补字上限%d枚。" % (energy * int(e.args.draw_per))
 			return text
 		"energy_to_bonus":
-			return "%d储能，对应下一次攻击每段+%d；已有待兑现加成%d。" % [energy, energy * int(e.args.get("per", 2)), b.ability_value("next_energy_bonus")]
+			return "%d储能，对应下一次攻击每段+%d；已有待生效加成%d。" % [energy, energy * int(e.args.get("per", 2)), b.ability_value("next_energy_bonus")]
 		"heat_to_bonus":
 			return "%d热度，对应下一次攻击每段+%d；已有热力加成%d。" % [heat, heat * int(e.args.get("per", 2)), b.player.status_stacks("next_bonus")]
 		"energy_to_heat_damage":
@@ -169,9 +169,9 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 		"heat_to_persist_block", "suspend":
 			return "%d热度，对应%d持久盾。" % [heat, heat * BattleBalance.i("heat_block_mult", 2)]
 		"electric_strike":
-			return "%d储能，对应一次%d基础伤害，不消耗储能。" % [energy, e.amount + energy * int(e.args.get("per", 2))]
+			return "%d储能，对应一次%d基础伤害。" % [energy, e.amount + energy * int(e.args.get("per", 2))]
 		"fire_power":
-			return "%d热度，对应一次%d基础伤害，不消耗热度。" % [heat, e.amount + heat * int(e.args.get("per", 2))]
+			return "%d热度，对应一次%d基础伤害。" % [heat, e.amount + heat * int(e.args.get("per", 2))]
 		"heat_burst":
 			return "%d热度，对应一次%d基础伤害。" % [heat, e.amount + heat * int(e.args.get("per", 4))]
 		"ability_overfire":
@@ -185,7 +185,7 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 			return "现有%d持久盾，将全部消耗，对应一次%d基础伤害。" % [shield, e.amount + bonus]
 
 		"permanent_damage_reduction":
-			return "本局已获得永久减伤，重复施放不叠加。" if GameState.permanent_damage_reduction > 0 else "本局尚未获得永久减伤，首次打出后从下一场战斗生效。"
+			return "本局已获得永久减伤，再打一次不叠加。" if GameState.permanent_damage_reduction > 0 else "本局尚未获得永久减伤，首次打出后从下一场战斗生效。"
 
 		"heat_to_damage_flow":
 			var cooled := mini(heat, mini(int(e.args.get("max", 4)), b.drawn_this_turn))
@@ -208,7 +208,7 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 		"precision_draw", "buy_bag_solo":
 			var source := b.board.get_xy(path[0]) if not path.is_empty() else null
 			var candidates := b.solo_bag_candidates(source)
-			return "可选原实体：%s。" % _glyphs(candidates) if not candidates.is_empty() else "没有可选实体，本次只弃掉原字。"
+			return "可选原字：%s。" % _glyphs(candidates) if not candidates.is_empty() else "没有可选实体，本次只弃掉原字。"
 		"energy_refund_once", "force_once", "energy_gain_once", "link_next_word", "solo_gain_once", "combine_next_word", "speed_next_word":
 			var ids := {"energy_refund_once": "energy_refund_once", "force_once": "force_once", "energy_gain_once": "energy_gain_once", "link_next_word": "link_draw_once", "solo_gain_once": "solo_gain_once", "combine_next_word": "combine_word_once", "speed_next_word": "speed_word_once"}
 			var existing := b.ability_value(ids[e.handler])
@@ -248,10 +248,10 @@ static func legacy_preview(e: EffectData, b: BattleState, path: Array, target: D
 
 static func _transfer(cards: Array, uid: int, b: BattleState) -> String:
 	if cards.is_empty():
-		return "没有可选原实体，本次不支付、不补字。"
+		return "没有可选原字，本次不支付、不补字。"
 	var due := EffectUtil.discounted_cost(b, BattleBalance.i("buy_cost", 2))
 	var payment := "需付%d铜钱，可支付%d铜钱。" % [due, EffectUtil.available(b)]
 	for card in cards:
 		if card.uid == uid:
 			return "已选己方原字【%s】，额外使用+%d；%s" % ["".join(card.glyph_list()), BattleBalance.i("buyback_layer", 1), payment]
-	return "可选原实体：%s；%s" % [_glyphs(cards), payment]
+	return "可选原字：%s；%s" % [_glyphs(cards), payment]

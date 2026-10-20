@@ -7,18 +7,18 @@
 script = ExtResource("1_tsnra")
 kind = 29
 handler = "reshuffle_line"
-note = "选一行或一列，将其中非固定己方原实体洗回字袋，再向该行列空格随机补相同数量。"
+note = "选一行或一列，将其中未固定己方原字洗回字袋，再向该行列空格随机补相同数量。"
 
 [resource]
 script = ExtResource("2_s6yna")
 id = "extra_jiliu"
 word = "急流"
 glyphs = Array[String](["急", "流"])
-description = "选一行或一列，将其中非固定己方原实体洗回字袋，再向该行列空格随机补相同数量。"
+description = "选一行或一列，将其中未固定己方原字洗回字袋，再向该行列空格随机补相同数量。"
 effects = Array[ExtResource("1_tsnra")]([SubResource("Resource_hhwdf")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "选一行或一列，将其中非固定己方原实体洗回字袋，再向该行列空格随机补相同数量。"
+effect_summary = "选一行或一列，将其中未固定己方原字洗回字袋，再向该行列空格随机补相同数量。"
 effect_handler_id = "reshuffle_line"
 priority = "流转"
 implemented = true

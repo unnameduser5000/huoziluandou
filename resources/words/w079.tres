@@ -12,18 +12,18 @@ target = 5
 args = {
 "reveal": 5
 }
-note = "揭示字袋至多5枚原实体，选1枚替换指定非固定盘面字；未选实体回袋。"
+note = "揭示字袋至多5枚原字，选1枚替换指定未固定盘面字；未选实体回袋。"
 
 [resource]
 script = ExtResource("2_wu3e4")
 id = "w079"
 word = "转化"
 glyphs = Array[String](["转", "化"])
-description = "揭示字袋至多5枚原实体，选1枚替换指定非固定盘面字；未选实体回袋。"
+description = "揭示字袋至多5枚原字，选1枚替换指定未固定盘面字；未选实体回袋。"
 effects = Array[ExtResource("1_4ryaa")]([SubResource("Resource_ov1qd")])
 group = "空间"
 design_stage = "P23初稿；未完成分组复审"
-effect_summary = "揭示字袋至多5枚原实体，选1枚替换指定非固定盘面字；未选实体回袋。"
+effect_summary = "揭示字袋至多5枚原字，选1枚替换指定未固定盘面字；未选实体回袋。"
 effect_handler_id = "transform_board"
 requires_target = 5
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"

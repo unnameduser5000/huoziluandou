@@ -8,18 +8,18 @@ script = ExtResource("1_opd3r")
 kind = 28
 handler = "repeat_word"
 timing = "persistent"
-note = "本场从下回合起，每回合首次有效多字词的即时效果额外执行一次，不重复消耗材料，费用照常再付。持续能力的启用效果不重演。"
+note = "本场从下回合起，每回合第一个组词（2 字及以上）的效果再结算一次。能力不会重复触发。"
 
 [resource]
 script = ExtResource("2_7ox8l")
 id = "w026"
 word = "重复"
 glyphs = Array[String](["重", "复"])
-description = "本场从下回合起，每回合首次有效多字词的即时效果额外执行一次，不重复消耗材料，费用照常再付。持续能力的启用效果不重演。"
+description = "本场从下回合起，每回合第一个组词（2 字及以上）的效果再结算一次。能力不会重复触发。"
 effects = Array[ExtResource("1_opd3r")]([SubResource("Resource_3rtv4")])
 group = "连携"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本场从下回合起，每回合首次有效多字词的即时效果额外执行一次，不重复消耗材料，费用照常再付。持续能力的启用效果不重演。"
+effect_summary = "本场从下回合起，每回合第一个组词（2 字及以上）的效果再结算一次。能力不会重复触发。"
 effect_handler_id = "repeat_word"
 timing = "persistent"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"

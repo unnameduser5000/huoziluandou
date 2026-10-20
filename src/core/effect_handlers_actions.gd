@@ -611,8 +611,8 @@ static func _vigor(b: BattleState) -> Array:
 	return ["精力：本回合每种不同多字词，使下回合基础补字 +1"]
 
 static func _charge_overheat(b: BattleState, eff: EffectData) -> Array:
-	var en: int = int(eff.args.get("energy", 8))
-	var ht: int = int(eff.args.get("heat", 8))
+	var en: int = int(eff.args.get("energy", 8)) * b.passive_multiplier("充电过热")
+	var ht: int = int(eff.args.get("heat", 8)) * b.passive_multiplier("充电过热")
 	b.add_energy(en)
 	b.add_heat(ht)
 	b.enable_ability("auto_refill", 1)

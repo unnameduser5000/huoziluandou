@@ -10,6 +10,8 @@ var _fail := 0
 
 
 func _ready() -> void:
+	SaveManager.enabled = false
+	GameState.set_meta("courtyard_preview", true)
 	_run.call_deferred()
 
 
@@ -179,6 +181,11 @@ func _run() -> void:
 	GameState.gold = 100
 	var invest: Dictionary = jade_room.apply({"type": "event", "index": 0})
 	_check(invest.ok and jade_room.phase == "event" and jade_room.event_node == "one" and GameState.gold == 92, "韫椟待贾投钱后进入下一节点并扣 8 铜钱")
+	_check("玉声近了" in str(jade_room.current_event().get("body", "")), "试椟的玉声反馈写进事件正文，且只有一句")
+	var jade_texts: Array = EFFECTS.node(jade, "one").options.map(func(o): return str(o.text))
+	_check(jade_texts.all(func(t): return not t.contains("失败得")), "开椟选项不提前说明赌输返还：%s" % [jade_texts])
+	var gamble: Dictionary = EFFECTS.resolve([{"type": "gain_relic", "relic": "random", "chance": 0.0, "fallback_gold": 10}], rng, true)
+	_check(gamble.ok and (gamble.get("notes", []) as Array).has("开椟（未得遗物，返还 10 铜钱）"), "赌输后才给出「行动（效果）」格式的结果文案")
 	# 删字与净化：条件、稀有度过滤、连续删两枚
 	GameState.start_new_run("v03")
 	GameState.player_max_hp = 60

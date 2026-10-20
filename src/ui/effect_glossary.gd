@@ -3,7 +3,7 @@ class_name EffectGlossary
 ## 纯展示词典：完整词效仍来自 WordData，不能执行效果或创建实体。
 
 const ENTRIES := {
-	"instant": ["即时效果", "立刻生效一次的伤害、补字、治疗、护盾等效果。"],
+	"instant": ["效果", "一个词当场结算一次的部分：伤害、补字、治疗、护盾、资源等。与「能力」相对。"],
 	"ability": ["持续能力", "启用后在指定时间内反复触发的效果，如【蓄能】。效果重演不会重复启用。"],
 	"cleanse": ["净化", "移除字块上的污染，不改变字的归属。不能直接解除签或区域标记。"],
 	"negative": ["负面状态", "中毒、易伤等不利效果。清心只清除玩家状态；字块污染用净化，怪物标记按要求解除。"],
@@ -45,7 +45,7 @@ const ENTRIES := {
 	],
 	"gold": [
 		"铜钱",
-		"战斗内货币。支付词效费用、商店与服务时消耗；战外结算时余金按每 5 点 1 分换算分数，不会转成别的资源。"
+		"战斗内货币。支付效果费用、商店与服务时消耗；战外结算时余金按每 5 点 1 分换算分数，不会转成别的资源。"
 	],
 	"gilded": [
 		"镀金",
@@ -65,7 +65,7 @@ const ENTRIES := {
 	],
 	"replay": [
 		"效果重演",
-		"词语的即时效果再生效一次。字不再消耗，费用再付；启用持续能力的效果不重演。"
+		"这个词的效果再结算一次。字不再消耗，铜钱与储能照付；能力不会重复触发。"
 	],
 	"return": [
 		"返回原位",
@@ -93,7 +93,7 @@ const ENTRIES := {
 	],
 	"burn": [
 		"灼烧",
-		"敌人每次行动后受到伤害。伤害在施放时确定，之后改变热度不影响。"
+		"每层每回合失去「当前热度 × 2」生命，结算后掉 1 层。"
 	],
 	"scorch": [
 		"灼热污染",
@@ -109,7 +109,7 @@ const ENTRIES := {
 	],
 	"heat": [
 		"热度",
-		"本场战斗中的资源，可被字词增加、降低或消耗，部分词效按当前热度计算收益。热容是安全上限；升温超过热容时，新增溢热会向字袋加入带灼热污染的【热】。"
+		"本场战斗中的资源，可被字词增加、降低或消耗，部分效果按当前热度计算收益。热容是安全上限；升温超过热容时，新增溢热会向字袋加入带灼热污染的【热】。"
 	],
 	"capacity": [
 		"热容",
@@ -121,11 +121,11 @@ const ENTRIES := {
 	],
 	"double_attack": [
 		"超强增幅",
-		"增强下一次攻击，用后消耗1层，可跨回合保留。"
+		"增强下一次攻击，用后消耗1层。"
 	],
 	"double_passive": [
 		"能力收益",
-		"支持加速、流转、能力、连载、蓄能、蓄热、分利、过热、火热、电流过载、电能、心力、护甲。只增加收益，不增加费用或降温量。"
+		"能力带来的收益：补字、储能、治疗、护盾、伤害、层数、热容等。【超能力】会让本回合的这些收益全部结算两遍；消耗（如清空热度/储能）不翻倍。回合开始才结算的收益（回能、强心）不属于本回合，不受影响。"
 	],
 	"formation": [
 		"结阵",
@@ -135,10 +135,11 @@ const ENTRIES := {
 
 ## 长词优先，避免把“非攻击伤害”拆成“攻击”等片段。
 const TERMS := {
-	"即时效果": "instant", "持续能力": "ability", "净化": "cleanse", "负面状态": "negative",
+	"即时效果": "instant", "持续能力": "ability", "能力": "ability",
+	"净化": "cleanse", "负面状态": "negative",
 	"临时格挡": "block", "临挡": "block", "持久盾": "shield", "力量": "strength",
-	"反击": "counter", "临时复制": "temporary", "临时副本": "temporary", "临时字": "temporary",
-	"己方原实体": "original", "原实体": "original", "实体字": "original", "己方原字": "original", "原字": "original",
+	"反击": "counter", "临时字": "temporary", "临时复制": "temporary", "临时副本": "temporary",
+	"己方原字": "original", "己方原实体": "original", "原字": "original", "原实体": "original", "字块": "original",
 	"额外使用": "extra_use", "精炼效果": "refined", "精炼": "refined", "固定": "pinned", "镀金": "gilded",
 	"仅供组词": "word_only", "融合": "fusion", "选中框": "selection",
 	"效果重演": "replay", "原格返回": "return", "返回原位": "return", "易伤": "vulnerable", "心蚀": "corrosion",
@@ -160,14 +161,15 @@ static func words_for_glyph(glyph: String) -> Array:
 static func character_hint(character: CharacterData) -> String:
 	var words := words_for_glyph(character.glyph).slice(0, 4)
 	if words.is_empty(): return character.description
-	return character.description + "\n可组：" + " / ".join(words.map(func(word): return "【%s】" % word))
+	return character.description + "
+可组：" + " / ".join(words.map(func(word): return "【%s】" % word))
 
 
 static func brief(word: WordData) -> String:
 	return WordDescriptions.brief(word)
 
 static func vulnerable_damage_text() -> String:
-	return "受到伤害×%s，向上取整。层数不影响倍率。" % BattleBalance.f("vulnerable_mult", 1.5)
+	return "受到伤害×%s。层数不影响倍率。" % BattleBalance.f("vulnerable_mult", 1.5)
 
 static func status_description(id: String) -> String:
 	match id:
@@ -177,11 +179,11 @@ static func status_description(id: String) -> String:
 		"poison": return "回合开始时，受到层数×%d伤害，可被护盾抵挡。" % BattleBalance.i("poison_per_stack", 1)
 		"heart_corrosion": return "敌人每次行动后受到层数×%d非攻击伤害。本场不减层。" % BattleBalance.i("corrosion_per_stack", 1)
 		"gold_burst": return "目标每受到一次攻击，你获得%d铜钱；多段攻击逐段计数，被护盾全挡也算。" % BattleBalance.i("bounty_on_hit", 1)
-		"next_double": return "下一次攻击的基础伤害、力量和热力加成×%d；蓄力、连载、过火不放大。攻击后消耗1层，被全挡也消耗，可跨回合保留。" % BattleBalance.i("double_attack_mult", 2)
+		"next_double": return "下一次攻击的基础伤害、力量和热力加成×%d；蓄力、连载、过火不放大。攻击后消耗1层，被全挡也消耗。" % BattleBalance.i("double_attack_mult", 2)
 	var data := Database.get_status(id)
-	if id == "next_extra": return "下一个词的即时效果重演，用后消耗1层。字不再消耗，费用再付，可跨回合保留。"
-	if id == "next_bonus": return "下一次攻击每段伤害+1/层；攻击后消耗，可跨回合保留。"
-	if id == "burn": return "敌人行动后受到伤害；伤害和剩余次数见当前状态。"
+	if id == "next_extra": return "下一个组词的效果再结算一次，用后消耗1层。字不再消耗，铜钱与储能照付。"
+	if id == "next_bonus": return "下一次攻击每段伤害+1/层；攻击后消耗。"
+	if id == "burn": return "每层每回合失去「当前热度×%d」生命，结算后掉 1 层。" % BattleBalance.i("burn_heat_mult", 2)
 	return data.description if data != null else ""
 
 static func entry(meta: String) -> Dictionary:
@@ -203,7 +205,7 @@ static func entry(meta: String) -> Dictionary:
 		var key := meta.trim_prefix("term:")
 		if ENTRIES.has(key):
 			var description: String = ENTRIES[key][1]
-			if key == "gilded": description = "每次打出此字获得%d铜钱，组词也算；仅弃字不算，融合字只计一次。永久保留，临时复制不继承。" % BattleBalance.i("gild_gold", 1)
+			if key == "gilded": description = "每次打出此字获得%d铜钱，组词也算；仅弃字不算，融合字只计一次。永久保留，临时字不继承。" % BattleBalance.i("gild_gold", 1)
 			elif key == "vulnerable":
 				var status := Database.get_status("vulnerable")
 				var decay := status.decay_per_turn if status != null else 1
@@ -214,7 +216,7 @@ static func entry(meta: String) -> Dictionary:
 			elif key in ["strength", "regen", "corrosion", "bounty", "double_attack"]:
 				var statuses := {"strength": "strength", "regen": "regen", "corrosion": "heart_corrosion", "bounty": "gold_burst", "double_attack": "next_double"}
 				description = str(entry("status:" + statuses[key]).get("text", description))
-			elif key == "burn": description = "【放火】的灼烧持续%d次敌方行动，每次行动后造成伤害。伤害在施放时确定，之后改变热度不影响。" % BattleBalance.i("burn_actions", 2)
+			elif key == "burn": description = "【放火】的灼烧：每层每回合失去当前热度×%d 生命，结算后掉 1 层。" % BattleBalance.i("burn_heat_mult", 2)
 			return {"title": ENTRIES[key][0], "text": description}
 	elif meta.begins_with("word:"):
 		var word := Database.get_word_by_glyphs_string(meta.trim_prefix("word:"))

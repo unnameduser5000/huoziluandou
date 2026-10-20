@@ -89,6 +89,7 @@ func _strs(list: Array) -> Array[String]:
 
 func _save(res: Resource, path: String) -> void:
 	if res is WordData:
+		# 只是把历史说明写进磁盘副本；运行时会被 BattleText.WORDS 覆盖（见 src/autoload/database.gd）
 		ContentBuild.WordDescriptionsS.apply_to(res)
 	var err := ResourceSaver.save(res, path)
 	if err != OK:
@@ -782,8 +783,8 @@ func _build_extra_words() -> void:
 	reconnect.timing = "delayed"
 	_save(reconnect, "%s/words/extra_chonglian.tres" % RES)
 	var linger := _extra_list("extra_liulian", "流连", ["流", "连"], "流转", "",
-		"本回合后续打出的每个字有 50% 概率留在原位（原实体保留，不叠加）",
-		[ContentBuild.e("linger_chance", 50, EffectDataS.Target.NONE, "", "本回合后续打出的每个字有 50% 概率留在原位（原实体保留，不叠加）", {}, -1, "persistent")])
+		"本回合后续每枚出字有 25% 概率留在原位（保留原实体）；再打一次叠到 50%，最多 2 层",
+		[ContentBuild.e("linger_chance", 25, EffectDataS.Target.NONE, "", "本回合后续每枚出字有 25% 概率留在原位（保留原实体）；再打一次叠到 50%，最多 2 层", {}, -1, "persistent")])
 	linger.timing = "persistent"
 	_save(linger, "%s/words/extra_liulian.tres" % RES)
 	var regen := _extra_list("extra_huineng", "回能", ["回", "能"], "蓄放", "",

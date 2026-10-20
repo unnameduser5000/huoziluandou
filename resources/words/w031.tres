@@ -7,18 +7,18 @@
 script = ExtResource("1_qpch0")
 kind = 29
 handler = "merge_flow"
-note = "揭示字袋1枚、从弃字堆选1枚己方原实体，分别放入两个相邻空格。无两个相邻空格时不移动。"
+note = "揭示字袋1枚、从弃字堆选1枚己方原字，分别放入两个相邻空格。无两个相邻空格时不移动。"
 
 [resource]
 script = ExtResource("2_2jii6")
 id = "w031"
 word = "合流"
 glyphs = Array[String](["合", "流"])
-description = "揭示字袋1枚、从弃字堆选1枚己方原实体，分别放入两个相邻空格。无两个相邻空格时不移动。"
+description = "揭示字袋1枚、从弃字堆选1枚己方原字，分别放入两个相邻空格。无两个相邻空格时不移动。"
 effects = Array[ExtResource("1_qpch0")]([SubResource("Resource_ei0d6")])
 group = "流转"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "揭示字袋1枚、从弃字堆选1枚己方原实体，分别放入两个相邻空格。无两个相邻空格时不移动。"
+effect_summary = "揭示字袋1枚、从弃字堆选1枚己方原字，分别放入两个相邻空格。无两个相邻空格时不移动。"
 effect_handler_id = "merge_flow"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P3·补全词效"

@@ -7,18 +7,18 @@
 script = ExtResource("1_1x1mo")
 kind = 29
 handler = "collect_own"
-note = "选择任意数量非固定、非临时的己方原实体放回字袋，每枚回复1生命，可不选。"
+note = "选择任意数量未固定、非临时的己方原字放回字袋，每枚回复1生命，可不选。"
 
 [resource]
 script = ExtResource("2_b602f")
 id = "extra_shouxin"
 word = "收心"
 glyphs = Array[String](["收", "心"])
-description = "选择任意数量非固定、非临时的己方原实体放回字袋，每枚回复1生命，可不选。"
+description = "选择任意数量未固定、非临时的己方原字放回字袋，每枚回复1生命，可不选。"
 effects = Array[ExtResource("1_1x1mo")]([SubResource("Resource_rqp5k")])
 group = "流转"
 design_stage = "设计负责人新增"
-effect_summary = "选择任意数量非固定、非临时的己方原实体放回字袋，每枚回复1生命，可不选。"
+effect_summary = "选择任意数量未固定、非临时的己方原字放回字袋，每枚回复1生命，可不选。"
 effect_handler_id = "collect_own"
 priority = "流转"
 implemented = true

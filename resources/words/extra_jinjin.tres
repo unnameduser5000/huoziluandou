@@ -9,18 +9,18 @@ kind = 29
 handler = "gild_glyph"
 amount = 0
 args = {"cost": 0}
-note = "选择字袋中一枚未镀金的实体字永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
+note = "选择字袋中一枚未镀金的字块永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
 
 [resource]
 script = ExtResource("2_n71sw")
 id = "extra_jinjin"
 word = "精金"
 glyphs = Array[String](["精", "金"])
-description = "选择字袋中一枚未镀金的实体字永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
+description = "选择字袋中一枚未镀金的字块永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
 effects = Array[ExtResource("1_34uer")]([SubResource("Economy_0")])
 group = "经济"
 design_stage = "设计负责人新增"
-effect_summary = "选择字袋中一枚未镀金的实体字永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
+effect_summary = "选择字袋中一枚未镀金的字块永久镀金；该实体每次单独打出或参与有效组词获得1铜钱，单纯弃字不触发。"
 effect_handler_id = "gild_glyph"
 priority = "经济"
 implemented = true

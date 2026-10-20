@@ -7,14 +7,14 @@
 script = ExtResource("2_2paun")
 handler = "solo_release"
 amount = 2
-note = "不消耗储能造成 2 伤；可选择消耗 1 储能，改为造成 8 伤"
+note = "造成 2 伤；可选择消耗 1 储能，改为造成 8 伤。"
 
 [resource]
 script = ExtResource("1_o2adi")
 id = "fang2"
 glyph = "放"
 pinyin = "fang"
-description = "不消耗储能造成 2 伤；可选择消耗 1 储能，改为造成 8 伤"
+description = "造成 2 伤；可选择消耗 1 储能，改为造成 8 伤。"
 tags = Array[String](["energy", "space"])
 solo_effects = Array[ExtResource("2_2paun")]([SubResource("Effect")])
 solo_handler = "solo_release"

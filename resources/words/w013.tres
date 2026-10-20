@@ -8,18 +8,18 @@ script = ExtResource("1_lifr1")
 kind = 28
 handler = "blastproof"
 timing = "persistent"
-note = "本场己方原实体被摧毁时改为回字袋，每救回1枚获得1持久盾。"
+note = "本场己方原字被摧毁时改为回字袋，每救回1枚获得1持久盾。"
 
 [resource]
 script = ExtResource("2_4mi36")
 id = "w013"
 word = "防爆"
 glyphs = Array[String](["防", "爆"])
-description = "本场己方原实体被摧毁时改为回字袋，每救回1枚获得1持久盾。"
+description = "本场己方原字被摧毁时改为回字袋，每救回1枚获得1持久盾。"
 effects = Array[ExtResource("1_lifr1")]([SubResource("Resource_6nl3b")])
 group = "防反"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "本场己方原实体被摧毁时改为回字袋，每救回1枚获得1持久盾。"
+effect_summary = "本场己方原字被摧毁时改为回字袋，每救回1枚获得1持久盾。"
 effect_handler_id = "blastproof"
 timing = "persistent"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"

@@ -9,18 +9,18 @@ kind = 28
 handler = "permanent_damage_reduction"
 amount = 1
 timing = "persistent"
-note = "首次打出后，本局从下一场战斗起每次受到伤害减免1点；重复施放不叠加。"
+note = "本局从下一场战斗起，每次受伤 -1。再打一次不叠加。"
 
 [resource]
 script = ExtResource("2_fitmv")
 id = "w014"
 word = "防御力"
 glyphs = Array[String](["防", "御", "力"])
-description = "首次打出后，本局从下一场战斗起每次受到伤害减免1点；重复施放不叠加。"
+description = "本局从下一场战斗起，每次受伤 -1。再打一次不叠加。"
 effects = Array[ExtResource("1_xdwrd")]([SubResource("Resource_g5tkx")])
 group = "防反"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "首次打出后，本局从下一场战斗起每次受到伤害减免1点；重复施放不叠加。"
+effect_summary = "本局从下一场战斗起，每次受伤 -1。再打一次不叠加。"
 effect_handler_id = "permanent_damage_reduction"
 timing = "persistent"
 p25_implemented = true

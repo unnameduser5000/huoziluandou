@@ -9,18 +9,18 @@ kind = 6
 handler = "apply_status_enemy"
 amount = 4
 status_id = "heart_corrosion"
-note = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不衰减。"
+note = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不会随时间减少。"
 
 [resource]
 script = ExtResource("2_orj78")
 id = "extra_xinshi"
 word = "心蚀"
 glyphs = Array[String](["心", "蚀"])
-description = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不衰减。"
+description = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不会随时间减少。"
 effects = Array[ExtResource("1_gtuon")]([SubResource("Resource_obaxg")])
 group = "连携"
 design_stage = "设计负责人新增"
-effect_summary = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不衰减。"
+effect_summary = "给目标叠加4层心蚀。每次该敌人行动后，受到等于心蚀层数的非攻击伤害；可被护盾吸收，层数不会随时间减少。"
 effect_handler_id = "apply_status_enemy"
 priority = "连携"
 implemented = true

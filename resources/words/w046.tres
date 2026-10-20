@@ -8,20 +8,20 @@ script = ExtResource("1_lig3s")
 handler = "energy_discharge"
 amount = 4
 args = {
-"draw_per": 1
+"refund": 2
 }
-note = "消耗全部储能，每点造成一段4点基础伤害；目标死亡后余下段数转向下一名存活敌人。再按每点消耗储能随机补1字。"
+note = "消耗全部储能：每点造成 4 伤；每命中一段，下回合储能 +2。"
 
 [resource]
 script = ExtResource("2_5fs27")
 id = "w046"
 word = "充放电"
 glyphs = Array[String](["充", "放", "电"])
-description = "消耗全部储能，每点造成一段4点基础伤害；目标死亡后余下段数转向下一名存活敌人。再按每点消耗储能随机补1字。"
+description = "消耗全部储能：每点造成 4 伤；每命中一段，下回合储能 +2。"
 effects = Array[ExtResource("1_lig3s")]([SubResource("Resource_cx0sp")])
 group = "蓄放"
 design_stage = "已完成逐组第一轮讨论；尚非全部定稿"
-effect_summary = "消耗全部储能，每点造成一段4点基础伤害；目标死亡后余下段数转向下一名存活敌人。再按每点消耗储能随机补1字。"
+effect_summary = "消耗全部储能：每点造成 4 伤；每命中一段，下回合储能 +2。"
 effect_handler_id = "energy_discharge"
 implementation_delta = "尚无P25词效实现，Godot需按策划单独排期"
 priority = "P1·重点机制"

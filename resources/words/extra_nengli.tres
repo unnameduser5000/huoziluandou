@@ -9,18 +9,18 @@ kind = 28
 handler = "ability_longword_draw"
 amount = 1
 timing = "persistent"
-note = "本场持续：3 字及以上词各补 1 字"
+note = "本场：每打出 3 字及以上的词，在原位补 3 字（来源为字袋）。"
 
 [resource]
 script = ExtResource("2_t8met")
 id = "extra_nengli"
 word = "能力"
 glyphs = Array[String](["能", "力"])
-description = "本场持续：3 字及以上词各补 1 字"
+description = "本场：每打出 3 字及以上的词，在原位补 3 字（来源为字袋）。"
 effects = Array[ExtResource("1_86ovu")]([SubResource("Resource_vfdx4")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "本场持续：3 字及以上词各补 1 字"
+effect_summary = "本场：每打出 3 字及以上的词，在原位补 3 字。"
 effect_handler_id = "ability_longword_draw"
 priority = "蓄放"
 implemented = true

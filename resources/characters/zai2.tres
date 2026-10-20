@@ -7,14 +7,14 @@
 script = ExtResource("2_3chmg")
 kind = 29
 handler = "repeat_last"
-note = "复制上一手成功出字的最后一个字为临时副本，原格优先、被占则找空格；副本用后移除，不能复制【再】本身"
+note = "复制上一手成功出字的最后一个字为临时字，原格优先、被占则找空格；副本用后移除，不能复制【再】本身"
 
 [resource]
 script = ExtResource("1_d5npq")
 id = "zai2"
 glyph = "再"
 pinyin = "zai"
-description = "复制上一手成功出字的最后一个字为临时副本，原格优先、被占则找空格；副本用后移除，不能复制【再】本身"
+description = "复制上一手成功出字的最后一个字为临时字，原格优先、被占则找空格；副本用后移除，不能复制【再】本身"
 tags = Array[String](["economy"])
 solo_effects = Array[ExtResource("2_3chmg")]([SubResource("Resource_wxfgf")])
 solo_handler = "repeat_last"

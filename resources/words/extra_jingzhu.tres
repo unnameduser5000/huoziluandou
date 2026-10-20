@@ -10,7 +10,7 @@ handler = "pin_glyph"
 amount = 0
 target = 5
 timing = "immediate"
-note = "选择一枚己方原实体固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
+note = "选择一枚己方原字固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
 args = {}
 
 [resource]
@@ -18,11 +18,11 @@ script = ExtResource("2_b4q8q")
 id = "extra_jingzhu"
 word = "精铸"
 glyphs = Array[String](["精", "铸"])
-description = "选择一枚己方原实体固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
+description = "选择一枚己方原字固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
 effects = Array[ExtResource("1_01v2a")]([SubResource("Resource_q1qmw")])
 group = "空间"
 design_stage = "设计负责人新增"
-effect_summary = "选择一枚己方原实体固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
+effect_summary = "选择一枚己方原字固定，本场保留原格、不可移动或换字，每回合最多使用一次，下回合刷新"
 effect_handler_id = "pin_glyph"
 requires_target = 5
 priority = "空间"

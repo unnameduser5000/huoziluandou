@@ -11,7 +11,7 @@ class_name WordData
 @export var word: String = ""              ## 展示用，例如“击破”
 @export var glyphs: Array[String] = []     ## 按顺序排列的组成字
 @export var pinyin: String = ""
-@export_multiline var description: String = ""
+@export_multiline var description: String = ""   ## 运行时会由 BattleText.WORDS 覆盖；改说明请改 src/data/battle_text.gd
 @export var tags: Array[String] = []
 @export var allow_reversed: bool = false
 @export_range(0, 4) var rarity: int = 1

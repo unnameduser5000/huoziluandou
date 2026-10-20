@@ -7,18 +7,18 @@
 script = ExtResource("1_jlku5")
 kind = 29
 handler = "next_copy_layer"
-note = "本回合下一次三字及以上词，按材料顺序自动消耗储能：每付1储能，在一个已腾空的原格留下临时副本，直到储能或可留材料用尽。"
+note = "本回合下一个 3 字及以上的词：每付 1 储能，就在一个腾出的格子里留下 1 枚临时字，直到储能或格子用尽。"
 
 [resource]
 script = ExtResource("2_284oa")
 id = "extra_chaoneng"
 word = "超能"
 glyphs = Array[String](["超", "能"])
-description = "本回合下一次三字及以上词，按材料顺序自动消耗储能：每付1储能，在一个已腾空的原格留下临时副本，直到储能或可留材料用尽。"
+description = "本回合下一个 3 字及以上的词：每付 1 储能，就在一个腾出的格子里留下 1 枚临时字，直到储能或格子用尽。"
 effects = Array[ExtResource("1_jlku5")]([SubResource("Resource_y2ojm")])
 group = "蓄放"
 design_stage = "设计负责人新增"
-effect_summary = "本回合下一次三字及以上词，按材料顺序自动消耗储能：每付1储能，在一个已腾空的原格留下临时副本，直到储能或可留材料用尽。"
+effect_summary = "本回合下一个 3 字及以上的词：每付 1 储能，就在一个腾出的格子里留下 1 枚临时字，直到储能或格子用尽。"
 effect_handler_id = "next_copy_layer"
 priority = "蓄放"
 implemented = true

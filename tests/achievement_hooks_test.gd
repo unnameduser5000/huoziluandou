@@ -66,7 +66,7 @@ func _ready() -> void:
 	b.deal_damage(enemy, 2, false)
 	check(Achievements.is_unlocked("boss_plate"), "指定首领死亡触发对应成就")
 	fresh(); b = battle()
-	enemy = b.enemies[0]; enemy.hp = 1; enemy.add_status("burn", 1); enemy.status_data.burn_damage = 2
+	enemy = b.enemies[0]; enemy.hp = 1; enemy.add_status("burn", 1); b.player.heat = 1
 	b._enemy_act(enemy)
 	check(Achievements.is_unlocked("burn_kill"), "敌人因实际灼烧死亡触发")
 	# 镀金收益按实际入账，不把触及本场金币上限的部分算进去。
