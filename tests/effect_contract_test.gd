@@ -44,7 +44,7 @@ func _signature(b: BattleState) -> String:
 		"reveal": b.pending_reveal.map(func(c): return c.uid), "choice": b.pending_choice,
 		"player": [b.player.hp, b.player.block, b.player.energy, b.player.heat],
 		"abilities": b.abilities, "history": b.last_played_glyphs, "log": b.log,
-		"queue": b.formation_queue, "reserved": b.reserved_cells, "double_armed": b._double_armed})
+		"queue": b.formation_queue, "reserved": b.reserved_cells, "double_armed": b.get("_double_armed")})
 
 
 func _cards(b: BattleState) -> Array:

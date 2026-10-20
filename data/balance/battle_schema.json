@@ -5952,7 +5952,7 @@
           "res://resources/starter_decks/v03.tres"
         ],
         [
-          "starter_decks/v03/entries/8/count",
+          "starter_decks/v03/entries/7/count",
           "v03·御",
           "实体字数量",
           1,
@@ -14169,28 +14169,12 @@
       "max": 99,
       "integer": true,
       "label": "实体字数量",
-      "name": "v03·连",
-      "group": "起始字袋",
-      "resource": "res://resources/starter_decks/v03.tres",
-      "property": [
-        "entries",
-        7,
-        "count"
-      ],
-      "source": "res://resources/starter_decks/v03.tres"
-    },
-    "starter_decks/v03/entries/8/count": {
-      "default": 1,
-      "min": 0,
-      "max": 99,
-      "integer": true,
-      "label": "实体字数量",
       "name": "v03·御",
       "group": "起始字袋",
       "resource": "res://resources/starter_decks/v03.tres",
       "property": [
         "entries",
-        8,
+        7,
         "count"
       ],
       "source": "res://resources/starter_decks/v03.tres"

@@ -219,7 +219,7 @@ func _test_start_and_move() -> void:
 	var main_deck := GameState.glyph_counts()
 	ex = _fresh()
 	_ok(ex_deck == main_deck, "远征的战斗字袋 = 标准主线默认起始字袋（v03）")
-	_ok(GameState.expedition == ex and GameState.deck_size() == 12 and not ex.get_property_list().any(func(p):return p.name == "tray") and ex.ink == Expedition.START_INK, "开局：仅字袋12枚，没有字匣库存")
+	_ok(GameState.expedition == ex and GameState.deck_size() == 11 and not ex.get_property_list().any(func(p):return p.name == "tray") and ex.ink == Expedition.START_INK, "开局：仅字袋11枚，没有字匣库存")
 	_ok(ex.themes.size() == 4 and ex.m.tn == ex.themes[0] and ex.explored.has(ex.m.start), "三幕主题不重复；起点可见")
 	_ok(not ex.explored.has(ex.m.lair), "首领巢穴藏在迷雾里")
 	_ok(not ex.boss_revealed(), "开局看不见首领棋子")
@@ -630,7 +630,7 @@ func _test_screens() -> void:
 	var screen: Control = Router.current
 	_ok(screen._map_grid.get_child_count() == MapGen.N and screen._build_box.get_child_count() >= 4, "远征地图12×8与构筑提示，不再显示版面")
 	_ok(screen._legend_box != null and screen._legend_box.is_inside_tree(), "页面里有图样说明（颜色、敌人、机关）")
-	_ok(not screen._actor_panel.visible and screen._boss_label.text.contains("沉睡"), "状态收进行囊，探索时不显示顶栏")
+	_ok(screen._boss_label.text.contains("沉睡"), "状态收进行囊，探索时不显示顶栏")
 	ex.stir = ex.t
 	ex.rise = ex.t
 	ex.alerts.append(["首领起身了", "测试"])

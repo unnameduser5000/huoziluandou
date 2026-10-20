@@ -112,7 +112,11 @@ static func apply_resource(original: Resource) -> Resource:
 		else: cursor[int(field) if field is float or field is int else str(field)] = number
 	# Starter entries carry CharacterData references too; bind those to the same tuned resource data.
 	if result is StarterDeckData:
-		for n in result.entries.size(): result.entries[n].character = apply_resource(original.entries[n].character)
+		# 条目可能已被前面的绑定改写（内联/引用两种来源），只处理两侧都存在的条目
+		for n in mini(result.entries.size(), original.entries.size()):
+			var src_entry = original.entries[n]
+			if src_entry != null and src_entry.character != null:
+				result.entries[n].character = apply_resource(src_entry.character)
 	var pairs: Array = []; var changes: Array[String] = []
 	for id in _bindings.get(path, []):
 		var meta: Dictionary = schema.params[id]

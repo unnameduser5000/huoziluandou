@@ -1,191 +1,50 @@
 [gd_resource type="Resource" script_class="StarterDeckData" format=3]
 
 [ext_resource type="Script" path="res://src/data/deck_entry_data.gd" id="1_5pocd"]
-[ext_resource type="Script" path="res://src/data/character_data.gd" id="2_kshav"]
-[ext_resource type="Script" path="res://src/data/effect_data.gd" id="3_6npd1"]
 [ext_resource type="Script" path="res://src/data/starter_deck_data.gd" id="4_6rplc"]
+[ext_resource type="Resource" path="res://resources/characters/ji.tres" id="5_ji"]
+[ext_resource type="Resource" path="res://resources/characters/fang.tres" id="6_fang"]
+[ext_resource type="Resource" path="res://resources/characters/hui.tres" id="7_hui"]
+[ext_resource type="Resource" path="res://resources/characters/fan.tres" id="8_fan"]
+[ext_resource type="Resource" path="res://resources/characters/po.tres" id="9_po"]
+[ext_resource type="Resource" path="res://resources/characters/zhong.tres" id="10_zhong"]
+[ext_resource type="Resource" path="res://resources/characters/liu.tres" id="11_liu"]
+[ext_resource type="Resource" path="res://resources/characters/yu.tres" id="12_yu"]
 
-[sub_resource type="Resource" id="Resource_dlcae"]
-script = ExtResource("3_6npd1")
-handler = "damage"
-amount = 4
-note = "造成 4 伤害"
-
-[sub_resource type="Resource" id="Resource_jw2wt"]
-script = ExtResource("2_kshav")
-id = "ji"
-glyph = "击"
-pinyin = "ji"
-description = "造成 4 伤害"
-tags = Array[String](["attack"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_dlcae")])
-solo_handler = "damage"
-
-[sub_resource type="Resource" id="Resource_l71gg"]
+[sub_resource type="Resource" id="Entry_ji"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_jw2wt")
+character = ExtResource("5_ji")
 count = 2
-
-[sub_resource type="Resource" id="Resource_nuctf"]
-script = ExtResource("3_6npd1")
-kind = 2
-handler = "block_temp"
-amount = 4
-note = "获得 4 点临时格挡"
-
-[sub_resource type="Resource" id="Resource_gk2ew"]
-script = ExtResource("2_kshav")
-id = "fang"
-glyph = "防"
-pinyin = "fang"
-description = "获得 4 点临时格挡"
-tags = Array[String](["defense"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_nuctf")])
-solo_handler = "block_temp"
-
-[sub_resource type="Resource" id="Resource_7854h"]
+[sub_resource type="Resource" id="Entry_fang"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_gk2ew")
+character = ExtResource("6_fang")
 count = 2
-
-[sub_resource type="Resource" id="Resource_28ayj"]
-script = ExtResource("3_6npd1")
-kind = 29
-handler = "replace_self"
-note = "在原位置随机换一枚字"
-
-[sub_resource type="Resource" id="Resource_mtd2g"]
-script = ExtResource("2_kshav")
-id = "hui"
-glyph = "回"
-pinyin = "hui"
-description = "在原位置随机换一枚字"
-tags = Array[String](["space", "flow"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_28ayj")])
-solo_handler = "replace_self"
-
-[sub_resource type="Resource" id="Resource_jhlp2"]
+[sub_resource type="Resource" id="Entry_hui"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_mtd2g")
+character = ExtResource("7_hui")
 count = 2
-
-[sub_resource type="Resource" id="Resource_hi5ot"]
-script = ExtResource("3_6npd1")
-handler = "damage"
-amount = 2
-note = "占位：造成 2 伤害（用户未确认）"
-
-[sub_resource type="Resource" id="Resource_rqu21"]
-script = ExtResource("2_kshav")
-id = "fan"
-glyph = "反"
-pinyin = "fan"
-description = "占位：造成 2 伤害（用户未确认）"
-tags = Array[String](["defense", "attack"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_hi5ot")])
-solo_handler = "damage"
-
-[sub_resource type="Resource" id="Resource_5b5xx"]
+[sub_resource type="Resource" id="Entry_fan"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_rqu21")
+character = ExtResource("8_fan")
 
-[sub_resource type="Resource" id="Resource_bd42x"]
-script = ExtResource("3_6npd1")
-handler = "damage"
-amount = 3
-note = "占位：造成 3 伤害（单字用途未定）"
-
-[sub_resource type="Resource" id="Resource_0whlm"]
-script = ExtResource("2_kshav")
-id = "po"
-glyph = "破"
-pinyin = "po"
-description = "占位：造成 3 伤害（单字用途未定）"
-tags = Array[String](["attack"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_bd42x")])
-solo_handler = "damage"
-
-[sub_resource type="Resource" id="Resource_54338"]
+[sub_resource type="Resource" id="Entry_po"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_0whlm")
+character = ExtResource("9_po")
 
-[sub_resource type="Resource" id="Resource_y1ot1"]
-script = ExtResource("3_6npd1")
-kind = 29
-handler = "gravity"
-target = 4
-note = "字盘按列向下重力"
-
-[sub_resource type="Resource" id="Resource_onwkr"]
-script = ExtResource("2_kshav")
-id = "zhong"
-glyph = "重"
-pinyin = "zhong"
-description = "字盘按列向下重力"
-tags = Array[String](["space"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_y1ot1")])
-solo_handler = "gravity"
-
-[sub_resource type="Resource" id="Resource_y6x0f"]
+[sub_resource type="Resource" id="Entry_zhong"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_onwkr")
+character = ExtResource("10_zhong")
 
-[sub_resource type="Resource" id="Resource_0t5hy"]
-script = ExtResource("3_6npd1")
-kind = 29
-handler = "draw_bonus_next"
-amount = 1
-note = "下回合多抽 1 字"
-
-[sub_resource type="Resource" id="Resource_qqn6x"]
-script = ExtResource("2_kshav")
-id = "liu"
-glyph = "流"
-pinyin = "liu"
-description = "下回合多抽 1 字"
-tags = Array[String](["flow"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_0t5hy")])
-solo_handler = "draw_bonus_next"
-
-[sub_resource type="Resource" id="Resource_mkg0v"]
+[sub_resource type="Resource" id="Entry_liu"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_qqn6x")
+character = ExtResource("11_liu")
 
-[sub_resource type="Resource" id="Resource_qojk7"]
-script = ExtResource("2_kshav")
-id = "lian"
-glyph = "连"
-pinyin = "lian"
-description = "可单字打出（暂无单字效果，用于腾出空格）。"
-tags = Array[String](["attack"])
-
-[sub_resource type="Resource" id="Resource_7862x"]
+[sub_resource type="Resource" id="Entry_yu"]
 script = ExtResource("1_5pocd")
-character = SubResource("Resource_qojk7")
-
-[sub_resource type="Resource" id="Resource_nmmnu"]
-script = ExtResource("3_6npd1")
-kind = 29
-handler = "guard_reduce"
-amount = 1
-note = "本回合每次受伤 -1"
-
-[sub_resource type="Resource" id="Resource_kbkh1"]
-script = ExtResource("2_kshav")
-id = "yu"
-glyph = "御"
-pinyin = "yu"
-description = "本回合每次受伤 -1"
-tags = Array[String](["defense"])
-solo_effects = Array[ExtResource("3_6npd1")]([SubResource("Resource_nmmnu")])
-solo_handler = "guard_reduce"
-
-[sub_resource type="Resource" id="Resource_2ho6w"]
-script = ExtResource("1_5pocd")
-character = SubResource("Resource_kbkh1")
+character = ExtResource("12_yu")
 
 [resource]
 script = ExtResource("4_6rplc")
 id = "v03"
-name = "初始字袋 V0.3（12 枚 / 9 种）"
-entries = Array[ExtResource("1_5pocd")]([SubResource("Resource_l71gg"), SubResource("Resource_7854h"), SubResource("Resource_jhlp2"), SubResource("Resource_5b5xx"), SubResource("Resource_54338"), SubResource("Resource_y6x0f"), SubResource("Resource_mkg0v"), SubResource("Resource_7862x"), SubResource("Resource_2ho6w")])
+name = "初始字袋 V0.3（11 枚 / 8 种）"
+entries = Array[ExtResource("1_5pocd")]([SubResource("Entry_ji"), SubResource("Entry_fang"), SubResource("Entry_hui"), SubResource("Entry_fan"), SubResource("Entry_po"), SubResource("Entry_zhong"), SubResource("Entry_liu"), SubResource("Entry_yu")])

@@ -1108,12 +1108,17 @@ func _test_edge_batch1() -> void:
 	# 能力
 	var b2 := _battle()
 	b2.enable_ability("longword_draw", 1)
-	b2.bag.append(CharInstance.new(Database.get_character_by_glyph("币")))
+	b2.bag.clear()
+	for i in 3:
+		b2.bag.append(CharInstance.new(Database.get_character_by_glyph("币")))
 	_place(b2, 0, 0, "防")
 	_place(b2, 1, 0, "御")
 	_place(b2, 2, 0, "力")
 	var r2 := b2.try_play([Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)])
-	_ok(r2.ok and b2.bag.is_empty() and b2.board.fill_count() == 1, "能力：3 字词额外补 1 字")
+	var back := 0
+	for i in 3:
+		if b2.board.get_xy(Vector2i(i, 0)) != null: back += 1
+	_ok(r2.ok and b2.bag.is_empty() and back == 3, "能力：3 字词在原位补 3 字")
 	# 电能
 	var b3 := _battle()
 	b3.enable_ability("electric_material", 1)

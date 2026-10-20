@@ -47,7 +47,11 @@ func _ready() -> void:
 	run.enter_room(run.next_rooms()[0])
 	var enemy: String = run.node.enemies[0].id
 	var history: Array = run.graph.enemy_history.duplicate()
-	var future: String = run.graph.rooms[run.current_room].next[0]
+	var future := ""
+	for rid in run.graph.rooms[run.current_room].next:
+		if ["battle", "elite", "boss"].has(str(run.graph.rooms[rid].kind)):
+			future = str(rid); break
+	check(not future.is_empty(), "后续房间里有战斗节点")
 	var future_enemy: String = run.battle_node(future).enemies[0].id
 	var path := "user://encounter-variety-test.tres"
 	check(run.save_run(path) == OK, "pending encounter saves")

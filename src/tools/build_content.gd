@@ -980,11 +980,11 @@ func _build_acts() -> void:
 func _build_starter_deck() -> void:
 	var entries := [
 		["击", 2], ["防", 2], ["回", 2], ["反", 1], ["破", 1],
-		["重", 1], ["流", 1], ["连", 1], ["御", 1],
+		["重", 1], ["流", 1], ["御", 1],
 	]
 	var deck: StarterDeckData = StarterDeckDataS.new()
 	deck.id = "v03"
-	deck.name = "初始字袋 V0.3（12 枚 / 9 种）"
+	deck.name = "初始字袋 V0.3（11 枚 / 8 种）"
 	deck.opening_draw = 10
 	deck.turn_draw = 3
 	var typed: Array[DeckEntryData] = []

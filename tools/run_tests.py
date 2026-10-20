@@ -72,7 +72,9 @@ EVENT = [
 ]
 
 # 引用了已删除接口 / 已写死旧实现的测试：默认不跑，显式点名才跑（会提示原因）。
-STALE = {}
+STALE = {
+    "expedition_map_view_test": "行囊面板已改为 RunInventory 覆盖层，脚本仍断言已删除的 _actor_panel；待按新布局重写",
+}
 
 ECONOMY = [
     "economy_gild_test",

@@ -60,7 +60,7 @@ func build(root: Control) -> void:
 	_main_buttons.assign(_buttons)
 	_ornament.setup(_main_buttons)
 	_utilities = HBoxContainer.new(); root.add_child(_utilities)
-	for entry in [["自定义构筑",_on_custom],["字网图谱",_on_graph],["旧版远征",_on_expedition]]:
+	for entry in [["自定义构筑",_on_custom],["字网图谱",_on_graph]]:
 		_utilities.add_child(_button(entry[0],entry[1]))
 	_veil = ColorRect.new()
 	_veil.color = Color(0.025, 0.06, 0.075, 0.0)
@@ -172,11 +172,6 @@ func _finish_start() -> void:
 	load("res://src/expedition/room_run_state.gd").start()
 	goto("res://src/screens/room_map_screen.gd")
 
-
-func _on_expedition() -> void:
-	if not _can_interact(): return
-	_expedition = true
-	_on_start()
 
 
 func _cancel_entry() -> void:

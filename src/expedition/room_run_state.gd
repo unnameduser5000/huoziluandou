@@ -496,6 +496,8 @@ func _restore_encounters() -> void:
 func battle_node(room_id := "", commit := false) -> MapNodeData:
 	if room_id.is_empty(): room_id = current_room
 	var spec: Dictionary = graph.rooms[room_id]
+	if not ["battle", "elite", "boss"].has(str(spec.kind)):
+		return null
 	var result := MapNodeData.new()
 	result.type = {"battle":MapNodeData.Type.BATTLE,"elite":MapNodeData.Type.ELITE,"boss":MapNodeData.Type.BOSS}[spec.kind]
 	var pool := _encounter_pools(room_id)

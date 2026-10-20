@@ -33,6 +33,8 @@ func _ready() -> void:
 	check(e.status_stacks("vulnerable") == 2, "目标获得2层易伤")
 	# 易伤倍率在数值表里可调，这里只看这一击确实超过了 8
 	check(e.hp < 92, "先易伤再出手：8点伤害按易伤结算（实际 %d）" % (100 - e.hp))
-	check(w.describe().contains("易伤") and w.describe().contains("8点伤害"), "说明写清易伤和伤害")
+	var raw_desc := str(WordDescriptions.TEXT.get("甲流", ""))
+	check(raw_desc.contains("易伤") and raw_desc.contains("8点伤害"), "说明写清易伤和伤害（数据侧）")
+	check(str(w.describe()) == "【？？？】", "彩蛋词玩家可见文案保持隐藏")
 	print("[jialiu_word_test] PASS=%d FAIL=%d TOTAL=%d" % [checks - failures, failures, checks])
 	get_tree().quit(1 if failures > 0 else 0)

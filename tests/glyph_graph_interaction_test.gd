@@ -37,7 +37,7 @@ func _run() -> void:
 		await frames()
 		if not before:
 			_layout_checks(screen, tag + " starter")
-			check(screen._view.nodes.size() == 9, tag + " starter filter keeps nine glyphs")
+			check(screen._view.nodes.size() == 8, tag + " starter filter keeps eight glyphs")
 		await shot(tag, "starter")
 		if not before:
 			screen._view.select("击")
