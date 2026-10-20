@@ -28,16 +28,29 @@ var _panning := false
 var _press_pos := Vector2.ZERO
 var _dragged := false
 var _focus: Dictionary = {}
+var _mouse_button := 0
+var _mouse_last := Vector2.ZERO
+var _touches: Dictionary = {}
+var _touch_origin := Vector2.ZERO
+var _touch_candidate := ""
+var _touch_tap := false
+var _touch_dragged := false
+var _last_touch_time := -1000
+var readable_start := false
+var _overview_requested := false
 
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
+	set_process_input(false)
 	resized.connect(_on_resized)
 	mouse_exited.connect(func(): _hover = ""; queue_redraw())
 
 
 func rebuild(words: Array, only_glyphs: Array = []) -> void:
+	_cancel_gestures()
+	_overview_requested = false
 	var out_adj: Dictionary = {}
 	var in_adj: Dictionary = {}
 	var edge_map: Dictionary = {}
@@ -62,6 +75,9 @@ func rebuild(words: Array, only_glyphs: Array = []) -> void:
 			in_adj[b][a] = int(in_adj[b].get(a, 0)) + 1
 			var key := a + "|" + b
 			edge_map[key] = int(edge_map.get(key, 0)) + 1
+	# Starter letters without a complete word still have a single-letter effect.
+	for glyph in only_glyphs:
+		if not word_count.has(glyph): word_count[glyph] = 0
 	nodes.clear()
 	edges.clear()
 	_index.clear()
@@ -194,11 +210,25 @@ func _fit_to_canvas() -> void:
 	var available := (size - Vector2(70, 70)).max(Vector2(1, 1))
 	zoom = clampf(minf(available.x / maxf(1.0, bounds.size.x), available.y / maxf(1.0, bounds.size.y)), MIN_ZOOM, 1.45)
 	camera_center = bounds.get_center()
+	# A phone opens at readable, touchable letter sizes; Overview explicitly fits
+	# the entire network. Both modes use the same world coordinates and rendering.
+	var readable_zoom := minf(MAX_ZOOM,0.75*JourneyStyle.touch_scale(self))
+	if readable_start and not _overview_requested and zoom<readable_zoom:
+		zoom = readable_zoom
+		var center := Vector2.ZERO
+		var total := 0.0
+		for nd in nodes:
+			if not _visible_node(nd.glyph): continue
+			var weight := maxf(1,float(nd.words))
+			center += (nd.pos as Vector2)*weight
+			total += weight
+		if total>0: camera_center = center/total
 	view_changed.emit()
 	queue_redraw()
 
 
 func _on_resized() -> void:
+	_cancel_gestures()
 	if _auto_fit:
 		_fit_to_canvas()
 	queue_redraw()
@@ -236,6 +266,7 @@ func clear_selection() -> void:
 
 
 func show_overview() -> void:
+	_overview_requested = true
 	clear_selection()
 	_fit_to_canvas()
 
@@ -333,40 +364,67 @@ func _octagon(p: Vector2, radius: float) -> PackedVector2Array:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if EffectText.blocks_pointer(get_viewport(), get_global_mouse_position()):
+	var point: Vector2 = event.position if event is InputEventMouse or event is InputEventScreenTouch or event is InputEventScreenDrag else get_local_mouse_position()
+	if EffectText.blocks_pointer(get_viewport(), get_global_transform() * point):
 		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		_touch_input(event)
+		accept_event()
+		return
+	if event is InputEventMouse:
+		# Android may emit a mouse event for the same finger; select only once.
+		if event.device==InputEvent.DEVICE_ID_EMULATION and Time.get_ticks_msec()-_last_touch_time<800:
+			accept_event()
+			return
+		_mouse_input(event)
+	elif event is InputEventMagnifyGesture:
+		zoom_at(event.factor, event.position)
+		accept_event()
+	elif event is InputEventPanGesture:
+		_pan_by(-event.delta * 24.0)
+		accept_event()
+
+
+func _mouse_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			zoom_at(1.15 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.15, event.position)
 			accept_event()
 		elif event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE]:
 			if event.pressed:
+				_mouse_button = event.button_index
+				_mouse_last = event.position
+				set_process_input(true)
 				_press_pos = event.position
 				_dragged = false
 				_drag_node = _node_at(event.position) if event.button_index == MOUSE_BUTTON_LEFT else ""
 				_panning = _drag_node.is_empty()
 				if not _drag_node.is_empty():
 					_drag_offset = _index[_drag_node].pos - view_to_world(event.position)
-			else:
+			elif _mouse_button==event.button_index:
 				if not _drag_node.is_empty():
 					var glyph := _drag_node
 					if _dragged:
 						_separate_nodes(160, glyph)
-					select(glyph)
-				elif _panning and not _dragged and event.button_index == MOUSE_BUTTON_LEFT:
+					if Rect2(Vector2.ZERO,size).has_point(event.position): select(glyph)
+				elif _panning and not _dragged and event.button_index == MOUSE_BUTTON_LEFT and Rect2(Vector2.ZERO,size).has_point(event.position):
 					clear_selection()
 				_drag_node = ""
 				_panning = false
+				_mouse_button = 0
+				set_process_input(not _touches.is_empty())
 				mouse_default_cursor_shape = CURSOR_ARROW
 				queue_redraw()
 			accept_event()
 	elif event is InputEventMouseMotion:
+		var movement: Vector2 = event.position-_mouse_last
+		_mouse_last = event.position
 		if _panning or not _drag_node.is_empty():
 			_dragged = _dragged or event.position.distance_to(_press_pos) > 4.0
 			if _dragged:
 				_auto_fit = false
 				if _panning:
-					camera_center -= event.relative / zoom
+					_pan_by(movement)
 					mouse_default_cursor_shape = CURSOR_DRAG
 				else:
 					_index[_drag_node].pos = view_to_world(event.position) + _drag_offset
@@ -375,14 +433,96 @@ func _gui_input(event: InputEvent) -> void:
 			_hover = _node_at(event.position)
 			mouse_default_cursor_shape = CURSOR_POINTING_HAND if not _hover.is_empty() else CURSOR_ARROW
 		queue_redraw()
-	elif event is InputEventMagnifyGesture:
-		zoom_at(event.factor, event.position)
-		accept_event()
-	elif event is InputEventPanGesture:
-		camera_center += event.delta * 24.0 / zoom
-		_auto_fit = false
-		queue_redraw()
-		accept_event()
+
+
+func _input(event: InputEvent) -> void:
+	# GUI dispatch stops at the view boundary; captured releases must not get lost.
+	if not is_visible_in_tree():
+		_cancel_gestures()
+		return
+	var relevant := (_mouse_button!=0 and (event is InputEventMouseMotion or event is InputEventMouseButton)) or (not _touches.is_empty() and (event is InputEventScreenTouch or event is InputEventScreenDrag))
+	if not relevant: return
+	var local := event.xformed_by(get_global_transform_with_canvas().affine_inverse())
+	if local is InputEventScreenTouch or local is InputEventScreenDrag:
+		if local is InputEventScreenTouch and local.pressed and not Rect2(Vector2.ZERO,size).has_point(local.position): return
+		_touch_input(local)
+	else:
+		_mouse_input(local)
+	get_viewport().set_input_as_handled()
+
+
+func _touch_input(event: InputEvent) -> void:
+	_last_touch_time = Time.get_ticks_msec()
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touches[event.index] = event.position
+			set_process_input(true)
+			if _touches.size()==1:
+				_touch_origin = event.position
+				_touch_candidate = _node_at(event.position)
+				_touch_tap = true
+				_touch_dragged = false
+			else: _touch_tap = false
+		elif _touches.has(event.index):
+			var glyph := _touch_candidate
+			var tap: bool = _touches.size()==1 and _touch_tap and not event.canceled and Rect2(Vector2.ZERO,size).has_point(event.position) and event.position.distance_to(_touch_origin)<=8*JourneyStyle.touch_scale(self)
+			_touches.erase(event.index)
+			_touch_tap = false
+			if _touches.is_empty(): set_process_input(_mouse_button!=0)
+			else: _touch_dragged = true
+			if tap and glyph==_node_at(event.position):
+				if glyph.is_empty(): clear_selection()
+				else: select(glyph)
+	elif event is InputEventScreenDrag and _touches.has(event.index):
+		var previous: Vector2 = _touches[event.index]
+		var old_center := _touch_center()
+		var old_distance := _touch_distance()
+		_touches[event.index] = event.position
+		if _touches.size()>1:
+			_touch_tap = false
+			_touch_dragged = true
+			if old_distance>1: zoom_at(_touch_distance()/old_distance,old_center)
+			_pan_by(_touch_center()-old_center)
+		elif _touch_dragged or event.position.distance_to(_touch_origin)>8*JourneyStyle.touch_scale(self):
+			_touch_tap = false
+			_pan_by(event.position-(previous if _touch_dragged else _touch_origin))
+			_touch_dragged = true
+
+
+func _touch_center() -> Vector2:
+	var center := Vector2.ZERO
+	for point: Vector2 in _touches.values(): center += point
+	return center/maxi(1,_touches.size())
+
+
+func _touch_distance() -> float:
+	var points := _touches.values()
+	return (points[0] as Vector2).distance_to(points[1]) if points.size()>1 else 0.0
+
+
+func _pan_by(movement: Vector2) -> void:
+	camera_center -= movement/zoom
+	_auto_fit = false
+	# Retain a visible strip of the graph when dragged far beyond its bounds.
+	var bounds := layout_bounds(focus_only)
+	var reach := (size*0.5-Vector2.ONE*24).max(Vector2.ZERO)/zoom
+	camera_center = camera_center.clamp(bounds.position-reach,bounds.end+reach)
+	queue_redraw()
+
+
+func _cancel_gestures() -> void:
+	_mouse_button = 0
+	_drag_node = ""
+	_panning = false
+	_touches.clear()
+	_touch_tap = false
+	set_process_input(false)
+	mouse_default_cursor_shape = CURSOR_ARROW
+
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_WM_WINDOW_FOCUS_OUT or (what==NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree()):
+		_cancel_gestures()
 
 
 func _node_at(p: Vector2) -> String:

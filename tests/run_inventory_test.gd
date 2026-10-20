@@ -36,7 +36,7 @@ func _run() -> void:
 		if page == "room_map_3d":
 			while screen.map_view._building: await frames()
 		var bar: Control = screen.inventory_bar
-		if page in ["title", "battle"]:
+		if page in ["title", "battle", "glyph_graph"]:
 			check(bar==null, page + " does not display the shared run inventory")
 			check(screen.content.position.is_equal_approx(Vector2.ZERO) and screen.content.size.is_equal_approx(screen.size), page + " keeps the full content area without an empty inventory strip")
 			continue

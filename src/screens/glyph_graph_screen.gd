@@ -19,6 +19,23 @@ var _scope_buttons: Dictionary = {}
 var _words: Array = []
 var _word_cards: Array = []
 var _built := false
+var _frame: MarginContainer
+var _main: VBoxContainer
+var _body: HBoxContainer
+var _footer: HFlowContainer
+var _detail_scroll: ScrollContainer
+var _navigation_buttons: Array[Button] = []
+var _details_button: Button
+var _back_button: Button
+var _details_overlay: Control
+var _mobile := false
+var _ui_scale := 1.0
+var _refreshing := false
+
+
+func has_run_inventory() -> bool:
+	# This is a reference page entered from the title, not the active adventure.
+	return false
 
 
 func has_scene_background() -> bool:
@@ -40,13 +57,16 @@ func build(root: Control) -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(shade)
 	var frame := Ink.margin(22)
+	_frame = frame
 	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(frame)
 	var main := Ink.vbox(12)
+	_main = main
 	frame.add_child(main)
 	main.add_child(_build_header())
 	main.add_child(_build_filters())
 	var body := Ink.hbox(14)
+	_body = body
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	main.add_child(body)
 	var card := PanelContainer.new()
@@ -62,13 +82,20 @@ func build(root: Control) -> void:
 	_stats = _caption("")
 	bar.add_child(_stats)
 	bar.add_child(Ink.expander())
-	bar.add_child(_button("−", func(): _view.zoom_at(1.0 / 1.2, _view.size * 0.5)))
+	var minus := _button("−", func(): _view.zoom_at(1.0 / 1.2, _view.size * 0.5))
+	bar.add_child(minus)
 	_zoom_label = _caption("100%")
 	_zoom_label.custom_minimum_size.x = 48
 	_zoom_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bar.add_child(_zoom_label)
-	bar.add_child(_button("＋", func(): _view.zoom_at(1.2, _view.size * 0.5)))
-	bar.add_child(_button("总览", func(): _view.show_overview()))
+	var plus := _button("＋", func(): _view.zoom_at(1.2, _view.size * 0.5))
+	var overview := _button("总览", func(): _view.show_overview())
+	_navigation_buttons.assign([minus,plus,overview])
+	bar.add_child(plus)
+	bar.add_child(overview)
+	_details_button = _button("字录", _open_details)
+	_details_button.disabled = true
+	bar.add_child(_details_button)
 	_view = GlyphGraphView.new()
 	_view.custom_minimum_size = Vector2(180, 180)
 	_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -79,12 +106,14 @@ func build(root: Control) -> void:
 	_side = _build_side()
 	body.add_child(_side)
 	var foot := HFlowContainer.new()
+	_footer = foot
 	foot.add_theme_constant_override("h_separation", 20)
 	main.add_child(foot)
 	foot.add_child(_caption("滚轮缩放 · 拖动空白平移 · 拖动字块整理 · 点击字块查词"))
 	foot.add_child(_caption("箭头表示组词顺序，例如：火 → 力 = 火力"))
 	_built = true
-	resized.connect(_layout)
+	resized.connect(_layout.call_deferred)
+	get_window().size_changed.connect(_layout.call_deferred)
 	_layout()
 	_refresh()
 
@@ -92,7 +121,7 @@ func build(root: Control) -> void:
 func _graph_theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = Ink.sans
-	t.default_font_size = 17
+	t.default_font_size = roundi(17 * _ui_scale)
 	t.set_font("font", "Button", Ink.serif)
 	t.set_color("font_color", "Label", PAPER)
 	t.set_color("font_color", "Button", PAPER)
@@ -105,7 +134,7 @@ func _graph_theme() -> Theme:
 		t.set_stylebox(state, "Button", sb)
 	for entry in [["Heading", 25, PAPER], ["Muted", 14, MUTED], ["Stat", 22, GOLD], ["Title", 34, PAPER]]:
 		t.set_type_variation(entry[0], "Label")
-		t.set_font_size("font_size", entry[0], entry[1])
+		t.set_font_size("font_size", entry[0], roundi(entry[1] * _ui_scale))
 		t.set_font("font", entry[0], Ink.serif)
 		t.set_color("font_color", entry[0], entry[2])
 	t.set_font("normal_font", "RichTextLabel", Ink.sans)
@@ -136,8 +165,8 @@ func _panel(color: Color, padding: int) -> StyleBoxFlat:
 func _button(text: String, callback: Callable) -> Button:
 	var b := Ink.button(text)
 	b.focus_mode = Control.FOCUS_ALL
-	b.custom_minimum_size.y = 32
-	b.add_theme_font_size_override("font_size", 15)
+	b.custom_minimum_size.y = 48 * JourneyStyle.touch_scale(self)
+	b.add_theme_font_size_override("font_size", roundi(16 * JourneyStyle.touch_scale(self)))
 	b.pressed.connect(callback)
 	return b
 
@@ -154,6 +183,7 @@ func _effect(text: String, word: WordData = null) -> EffectText:
 	# 只替换本页生成的 BBCode 颜色；词条目标和全局浅色浮层保持原有协议。
 	label.text = label.text.replace("[color=#%s]" % Palette.INDIGO.to_html(false), "[color=#a8cec2]")
 	label.text = label.text.replace("[color=#%s]" % Palette.VERMILION_DK.to_html(false), "[color=#edac85]")
+	label.add_theme_font_size_override("normal_font_size", roundi(17 * _ui_scale))
 	return label
 
 
@@ -168,7 +198,8 @@ func _build_header() -> Control:
 	title.add_child(Ink.h2("字网图谱"))
 	title.add_child(_caption("循字寻词 · 万字相连"))
 	row.add_child(Ink.expander())
-	row.add_child(_button("返回标题", func(): goto("res://src/screens/title_screen.gd")))
+	_back_button = _button("返回标题", func(): goto("res://src/screens/title_screen.gd"))
+	row.add_child(_back_button)
 	return row
 
 
@@ -211,6 +242,7 @@ func _build_side() -> PanelContainer:
 	col.add_child(Ink.label("字 录", "Heading", GOLD))
 	col.add_child(Ink.hline(Color("536155")))
 	var scroll := ScrollContainer.new()
+	_detail_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_child(scroll)
@@ -221,8 +253,41 @@ func _build_side() -> PanelContainer:
 
 
 func _layout() -> void:
-	if _side != null:
-		_side.custom_minimum_size.x = clampf(size.x * 0.26, 250, 340)
+	if not _built: return
+	var unit := JourneyStyle.touch_scale(self)
+	var safe := ScreenLayout.safe_rect(self)
+	var mobile := safe.size.x / unit < 1100 or safe.size.y / unit < 600
+	if not mobile and is_instance_valid(_details_overlay): _details_overlay._close()
+	_mobile = mobile
+	_view.readable_start = mobile
+	_side.visible = not mobile
+	_details_button.visible = mobile
+	_footer.visible = not mobile
+	_stats.visible = not mobile
+	ScreenLayout.margins(_frame,self,(8 if mobile else 22) * unit)
+	_main.add_theme_constant_override("separation", roundi((6 if mobile else 12) * unit))
+	_body.add_theme_constant_override("separation", roundi(14 * unit))
+	_side.custom_minimum_size.x = clampf(safe.size.x * 0.28, 260 * unit, 360 * unit)
+	_search.custom_minimum_size = Vector2((160 if mobile else 220) * unit, 48 * unit)
+	for button in _navigation_buttons: button.custom_minimum_size = Vector2.ONE*48*unit
+	_zoom_label.custom_minimum_size.x = 64*unit
+	if not is_equal_approx(_ui_scale,unit):
+		_ui_scale = unit
+		theme = _graph_theme()
+		for button: Button in content.find_children("*","Button",true,false):
+			button.custom_minimum_size.y = 48 * unit
+			button.add_theme_font_size_override("font_size", roundi(16 * unit))
+		for effect: EffectText in _detail.find_children("*","RichTextLabel",true,false):
+			effect.add_theme_font_size_override("normal_font_size", roundi(17 * unit))
+	if is_instance_valid(_details_overlay): _details_overlay._layout()
+
+
+func _open_details() -> void:
+	if not _mobile or _view.selected.is_empty() or is_instance_valid(_details_overlay): return
+	_details_overlay = preload("res://src/ui/glyph_details_overlay.gd").new()
+	_details_overlay.detail = _detail
+	_details_overlay.restore_parent = _detail_scroll
+	add_child(_details_overlay)
 
 
 func _starter_glyphs() -> Array:
@@ -242,6 +307,8 @@ func _set_scope(scope: String) -> void:
 
 
 func _refresh() -> void:
+	if is_instance_valid(_details_overlay): _details_overlay._close()
+	_refreshing = true
 	var previous := _view.selected
 	_words = Database.words.values()
 	if _scope == "implemented":
@@ -252,13 +319,14 @@ func _refresh() -> void:
 	_words.sort_custom(func(a, b): return a.word < b.word)
 	for key in _scope_buttons:
 		_scope_buttons[key].set_pressed_no_signal(key == _scope)
-	_view.rebuild(_words)
+	_view.rebuild(_words, _starter_glyphs() if _scope=="starter" else [])
 	_stats.text = "%d 字  /  %d 词  /  %d 条关系" % [_view.nodes.size(), _words.size(), _view.edges.size()]
 	_hint.text = ""
 	if _view._index.has(previous):
 		_view.select(previous)
 	else:
 		_show_idle()
+	_refreshing = false
 
 
 func _clear_detail() -> void:
@@ -273,6 +341,7 @@ func _clear_detail() -> void:
 
 func _show_idle() -> void:
 	_clear_detail()
+	_details_button.disabled = true
 	var intro := Ink.body("点选一枚字，查看它能连成的词与单字效果。")
 	_detail.add_child(intro)
 	_detail.add_child(Ink.caption("图中每一块都是字，连线保留词中的先后顺序。"))
@@ -289,9 +358,11 @@ func _show_idle() -> void:
 
 func _on_node_selected(info: Dictionary) -> void:
 	if info.is_empty():
+		if is_instance_valid(_details_overlay): _details_overlay._close()
 		_show_idle()
 		return
 	_clear_detail()
+	_details_button.disabled = false
 	var glyph: String = info.glyph
 	var row := Ink.hbox(12)
 	_detail.add_child(row)
@@ -329,6 +400,7 @@ func _on_node_selected(info: Dictionary) -> void:
 	_detail.add_child(Ink.hline(Color("536155")))
 	_add_neighbors("后面可以接", info.out_list)
 	_add_neighbors("前面可以接", info.in_list)
+	if not _refreshing: _open_details()
 
 
 func _add_neighbors(title: String, glyphs: Array) -> void:

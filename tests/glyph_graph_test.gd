@@ -5,6 +5,8 @@ var _fail := 0
 var _capture := false
 
 func _ready() -> void:
+	SaveManager.enabled = false
+	get_window().size = Vector2i(1280,720)
 	_capture = OS.get_cmdline_user_args().has("--capture")
 	get_tree().create_timer(45).timeout.connect(func(): push_error("字网测试超时"); get_tree().quit(1))
 	_run.call_deferred()
@@ -136,6 +138,7 @@ func _run() -> void:
 	print("[graph] screen=", screen.size, " graph=", screen._view.size, " sidebar=", screen._side.size)
 	_check(str(Database.words.size()) in screen._scope_buttons.all.text, "范围按钮从数据库读取词数")
 	_check(screen._view.size.x > 300 and screen._view.size.y > 200, "图谱保有可操作的画布")
+	_check(screen.inventory_bar==null and screen.content.position.is_equal_approx(Vector2.ZERO), "图谱不显示局内资源栏，也不保留空白顶栏")
 	_check(_separated(screen._view), "真实页面初次打开后节点不重叠")
 	_capture_image("huoziluandou-graph-overview.png")
 	screen._find("击")
@@ -175,7 +178,7 @@ func _run() -> void:
 		screen._layout()
 		await _frames()
 		_capture_image("huoziluandou-graph-phone.png")
-	_check(screen._side.get_global_rect().end.x <= get_viewport_rect().size.x + 1.0, "详情栏不超出视口")
+	_check(not screen._side.is_visible_in_tree() or screen._side.get_global_rect().end.x <= get_viewport_rect().size.x + 1.0, "可见详情栏不超出视口")
 	_check(screen._view.size.y > 160, "窄屏仍保留图谱浏览高度")
 	_check(GameState.rng.state == rng_before and CharInstance._next_uid == uid_before, "图谱浏览不消耗随机数、不创建游戏实体")
 	screen.queue_free()
