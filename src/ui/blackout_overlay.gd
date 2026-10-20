@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name BlackoutOverlay
 ## 停电彩蛋：全屏变黑，只剩【开】【灯】两枚字块。
 ## 拖动（或依次点击）【开】→【灯】即可“来电”，`ESC` 也能摸黑开灯。

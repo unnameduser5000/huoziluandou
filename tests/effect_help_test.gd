@@ -165,6 +165,11 @@ func _run() -> void:
 	await _frames()
 	var collection_body: EffectText = collection._word_grid.get_child(0).get_child(0).get_child(2)
 	_check("url=term:block" in collection_body.text and "url=term:counter" in collection_body.text, "词语图鉴也使用精简文本与词条链接")
+	# 词页与实体字页一样要能拖动滚动：卡面不得拦截鼠标/触摸
+	var word_card: Control = collection._word_grid.get_child(0)
+	var blocking: Array = [word_card, collection_body].filter(func(n): return n.mouse_filter == Control.MOUSE_FILTER_STOP)
+	_check(blocking.is_empty(), "词页卡片不拦截滚动事件")
+	_check(collection._scroll.visible and collection._word_grid.get_child_count() == 2, "词页内容都在同一个可滚动容器里")
 	collection_body.meta_clicked.emit("term:counter")
 	await _frames()
 	collection._show_tab("chars")

@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name AchievementOverlay
 signal closed
 

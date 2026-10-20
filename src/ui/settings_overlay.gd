@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name SettingsOverlay
 ## 设置浮层（标题页与战斗内共用；浮层不影响任何界面状态）。
 

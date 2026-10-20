@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name CollectionOverlay
 ## 通用浏览浮层：字库图鉴 / 当前字袋 / 选字。cfg 见 setup()。
 
@@ -227,18 +227,25 @@ func _populate_words() -> void:
 	for w in words:
 		var holder := Ink.card()
 		holder.custom_minimum_size = Vector2(268, 0)
+		# 卡面不拦截鼠标/触摸，滚动交给外层 ScrollContainer（否则词页拖不动）
+		holder.mouse_filter = Control.MOUSE_FILTER_PASS
 		var inner := Ink.vbox(4)
+		inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		holder.add_child(inner)
 		var top := Ink.hbox(8)
+		top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner.add_child(top)
 		var t := Ink.label(w.glyph_string(), "Subheading", JourneyStyle.GOLD)
+		t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		top.add_child(t)
 		top.add_child(Ink.expander())
 		var meta := JourneyStyle.label(w.group, "Muted")
+		meta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner.add_child(meta)
 		var d := EffectText.new()
 		d.add_theme_font_size_override("normal_font_size", int(17 * JourneyStyle.touch_scale(self)))
 		d.set_effect_text(EffectGlossary.brief(w), 0, w)
+		d.mouse_filter = Control.MOUSE_FILTER_PASS
 		inner.add_child(d)
 		_word_grid.add_child(holder)
 

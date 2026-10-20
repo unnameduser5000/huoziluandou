@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name ChoiceOverlay
 ## 通用选择浮层：岔路、事件选项、商店确认都用它。
 ## cfg = { title, body, options: [{text, primary, disabled, hint}], on_choose: Callable(index) }
@@ -146,7 +146,6 @@ func _build() -> void:
 	var cancel_index := int(cfg.get("cancel_index", -1))
 	var option_parent: VBoxContainer = col
 	if scroll_options:
-		z_index = 80
 		_options_scroll = ScrollContainer.new()
 		_options_scroll.name = "OptionsScroll"
 		_options_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED

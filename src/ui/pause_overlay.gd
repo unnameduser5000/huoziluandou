@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name PauseOverlay
 ## 唯一的游戏菜单：常用入口集中于此，设置关闭后回到菜单。
 var _main_layer: Control

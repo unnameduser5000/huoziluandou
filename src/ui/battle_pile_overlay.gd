@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 class_name BattlePileOverlay
 ## 只读的战斗牌堆快照。按字形和可见状态归类，完全不读取或展示抽取顺序。
 ## 居中的半透明中型窗口，背后的战斗仍可看见；点窗外或 ESC 关闭。
@@ -39,8 +39,6 @@ func setup(p_title: String, instances: Array) -> void:
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# 敌人立绘用绝对 z_index 分层，窗口要压在它们上面
-	z_index = 100
 	var dim := ColorRect.new()
 	dim.color = Color(0.04, 0.06, 0.05, 0.32)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

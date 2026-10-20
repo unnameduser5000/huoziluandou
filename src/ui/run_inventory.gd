@@ -85,7 +85,6 @@ func open(tab: String, relic_id := "") -> void:
 	_overlay = Viewer.new()
 	_overlay.initial_tab = tab
 	_overlay.initial_relic = relic_id
-	_overlay.z_index = 71
 	if screen.has_method("_mount_overlay"):
 		screen.call("_mount_overlay", _overlay)
 	else:

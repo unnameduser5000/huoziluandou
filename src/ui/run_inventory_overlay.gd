@@ -1,4 +1,4 @@
-extends Control
+extends "res://src/ui/modal_overlay.gd"
 ## 只读行囊：牌库按永久实体逐枚展示，不合并有不同强化的同名字。
 var initial_tab := "deck"
 var initial_relic := ""
